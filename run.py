@@ -1,13 +1,12 @@
 import pygame
 from constants import *
-import utils
+#import utils
 from math import floor
 from Primitives.vectors import Vector2
 from Primitives.vertex import Vertex, VertexShadow
 from Primitives.lines import Line
-from Primitives.segment import SegmentDirected
+from Primitives.segment import Segment
 from events import EventManager
-from Primitives.sector import Sector
 from bsp import BinarySpacePartitioner as BSP
 
 class GameController(object):
@@ -39,12 +38,6 @@ class GameController(object):
         self.connectionLine = None #The line that shows when you are drawing a line from one vertex to the next
         self.showGrid = False
         self.vertex_key_ctr = 0
-        self.sectors = None
-        #self.polygonPoints = []
-        self.sectorToShow = None
-        self.probe = None
-        self.sectorIndex = 0
-        self.sectorCheck = None #helps with debugging the sector splitting
         self.bsp = None
         self.testvertexlist = []
         
@@ -112,7 +105,7 @@ class GameController(object):
         segments = []
         for key in self.vertices.keys():
             for i in range(len(self.vertices[key].neighbors)):
-                segments.append(SegmentDirected(self.vertices[key], self.vertices[key].neighbors[i]))
+                segments.append(Segment(self.vertices[key], self.vertices[key].neighbors[i]))
         return segments
 
     def createBinaryTree(self):
@@ -139,16 +132,14 @@ class GameController(object):
 
     def connectVerticesDirected(self):
         '''Only vertex 1 knows about vertex 2'''
-        print("directed")
-        #print(str(self.vertex0.key) + " ==> " + str(self.hoverVertex.key))
         self.vertex0.addNeighbor(self.hoverVertex)
         
-    def connectVerticesUndirected(self):
+    #def connectVerticesUndirected(self):
         '''Connect two vertices together such that they are neighbors of each other'''
-        print("Undirected")
+    #    print("Undirected")
         #print(str(self.vertex0.key) + " <==> " + str(self.hoverVertex.key))
-        self.vertex0.addNeighbor(self.hoverVertex)
-        self.hoverVertex.addNeighbor(self.vertex0)
+    #    self.vertex0.addNeighbor(self.hoverVertex)
+    #    self.hoverVertex.addNeighbor(self.vertex0)
         
     def removeNeighbors(self):
         '''Remove all the neighbors from the vertices'''
@@ -183,9 +174,6 @@ class GameController(object):
 
         if self.vertexShadow is not None:
             self.vertexShadow.render(self.screen)
-
-        if self.sectorCheck is not None:
-            self.sectorCheck.renderMidpoint(self.screen)
 
         #This is just to show where the line splits will be made when doing bsp
         if len(self.testvertexlist) > 0:

@@ -1,6 +1,6 @@
 import pygame
 from Primitives.btree import BinaryTree
-from Primitives.sector import SectorBSP
+from Primitives.sector import Sector
 
 """Input a list of SegmentDirected objects"""
 class BinarySpacePartitioner(object):
@@ -22,7 +22,7 @@ class BinarySpacePartitioner(object):
         '''Check if a group of segments defines a convex or concave area'''
         segmentList = self.tree.pointer.data
         #print(segmentList)
-        self.sector = SectorBSP(segmentList)
+        self.sector = Sector(segmentList)
         isconvex = self.sector.convexOrConcave()
         return isconvex
 

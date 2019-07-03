@@ -1,5 +1,12 @@
 from copy import deepcopy
 
+def clamp(value, precision):
+    '''Clamp a value'''
+    val = round(value, precision)
+    if val == 0.0:
+        val = abs(val)
+    return val
+
 def pairExists(pair, pairlist):
     '''Check if the pair is in the pairlist.  pairlist is a list of tuples and pair is a list'''
     pair2 = deepcopy(pair)

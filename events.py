@@ -7,7 +7,7 @@ class EventManager(object):
     def __init__(self, controller):
         self.controller = controller
         self.snapToGrid = False
-        self.directedGraph = False
+        self.directedGraph = True
         
     def update(self, mouseposition):
         for event in pygame.event.get():
@@ -44,9 +44,6 @@ class EventManager(object):
                 if event.key == K_z:
                     #Erase everything from the screen and start from scratch
                     self.controller.setup()
-                if event.key == K_d:
-                    self.directedGraph = not self.directedGraph
-                    print("Directed graph = " + str(self.directedGraph))
                 if event.key == K_n:
                     self.controller.showVertices = not self.controller.showVertices
                 if event.key == K_b:
@@ -75,10 +72,7 @@ class EventManager(object):
                         self.controller.hoverVertex.position = self.getMousePosition(mouseposition)
                 elif self.controller.connectionMode:
                     if self.controller.hoverVertex is not None:
-                        if self.directedGraph:
-                            self.controller.connectVerticesDirected()
-                        else:
-                            self.controller.connectVerticesUndirected()
+                        self.controller.connectVerticesDirected()
                     self.controller.connectionLine = None
                     self.controller.vertex0 = None
                 elif self.controller.probeMode:
