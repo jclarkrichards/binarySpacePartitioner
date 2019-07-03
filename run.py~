@@ -1,0 +1,333 @@
+import pygame
+from constants import *
+import utils
+from math import floor
+from Primitives.vectors import Vector2
+from Primitives.vertex import Vertex, VertexShadow, Probe
+from Primitives.lines import Line, SegmentDirected
+from events import EventManager
+from mst import MST
+#from cyclefinder import CycleFinder
+from basesectors import BaseSectors
+from sector import Sector
+from bsp import BinarySpacePartitioner as BSP
+
+class GameController(object):
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
+        self.background = None
+        self.background_edit = None
+        self.background_connection = None
+        self.background_check = None
+        self.setBackground()
+        self.grid = [] #list of lines that define the grid
+        self.setup()
+        self.events = EventManager(self)
+        
+    def setup(self):
+        self.vertices = {}
+        self.vertexShadow = None
+        self.showVertices = True
+        self.editMode = False #move vertices around
+        self.connectionMode = False #connect vertices together
+        self.checkMode = False #For checking the vertices properties by clicking on them
+        self.probeMode = False #For testing.  Create a probe point (vertex)
+        self.drawGraphQuickMode = False
+        self.hoverVertex = None #vertex the mouse is hovering over at any point in time
+        self.vertex0 = None #vertex that connection line is coming from
+        self.followMouse = False #If true then the hoverVertex will follow the mouse if it is not None
+        self.drawConnectionLine = False
+        self.connectionLine = None #The line that shows when you are drawing a line from one vertex to the next
+        self.showGrid = False
+        self.vertex_key_ctr = 0
+        self.sectors = None
+        self.mst = None
+        self.drawMST = False
+        #self.polygonPoints = []
+        self.sectorToShow = None
+        self.probe = None
+        self.sectorIndex = 0
+        self.sectorCheck = None #helps with debugging the sector splitting
+        self.bsp = None
+        self.testvertexlist = []
+        
+    def setBackground(self):
+        self.background = pygame.surface.Surface(SCREENSIZE).convert()
+        self.background.fill(BLACK)
+        self.background_edit = pygame.surface.Surface(SCREENSIZE).convert()
+        self.background_edit.fill(BACKGROUNDEDIT)
+        self.background_connection = pygame.surface.Surface(SCREENSIZE).convert()
+        self.background_connection.fill(CONNECTIONMODECOLOR)
+        self.background_check = pygame.surface.Surface(SCREENSIZE).convert()
+        self.background_check.fill(CHECKMODECOLOR)
+        self.background_probe = pygame.surface.Surface(SCREENSIZE).convert()
+        self.background_probe.fill(PROBEMODECOLOR)
+
+    def defineGrid(self):
+        '''Defines vertical and horizontal lines'''
+        #Define vertical lines
+        for i in range(NCOLS):
+            self.grid.append(Line(Vector2(i*TILEWIDTH, 0), Vector2(i*TILEWIDTH, SCREENHEIGHT), GRAY))
+
+        #Define horizontal lines
+        for i in range(NROWS):
+            self.grid.append(Line(Vector2(0, i*TILEHEIGHT),Vector2(SCREENWIDTH, i*TILEHEIGHT), GRAY))
+
+    def update(self):
+        '''Main game loop'''
+        x, y = pygame.mouse.get_pos()
+        mouseposition = Vector2(x, y)
+
+        self.hoverVertex = None
+        for vertex in self.vertices.values():
+            if vertex.inbounds(mouseposition):
+                self.hoverVertex = vertex
+                #print(self.hoverVertex)
+
+        if self.editMode:
+            if self.hoverVertex is not None:
+                if self.followMouse:
+                    self.hoverVertex.position = mouseposition
+
+        if self.probeMode:
+            if self.probe is not None:
+                if self.followMouse:
+                    self.probe.position = mouseposition
+                
+        if self.vertexShadow is not None:
+            self.vertexShadow.update(mouseposition)
+
+        if self.connectionLine is not None:
+            self.connectionLine.vector1 = mouseposition
+        
+        self.events.update(mouseposition)
+        self.render()
+
+    def getVertex(self, position):
+        '''Return the key to the vertex that matches the position.  Return None if no matches.'''
+        for key in self.vertices.keys():
+            if self.vertices[key].position == position:
+                return key
+        return None
+    
+    def createProbe(self, position):
+        '''create a probe for testing various things'''
+        self.probe = Probe(position)
+    """
+    def injectVertex(self, segment, splitline):
+        '''Create a new vertex at the position and inject it into the graph between the vertices that make up the segment'''
+        print("add new vertex at key " + str(self.vertex_key_ctr))
+        print("splitting line is " + str(splitline))
+        print("segment " + str(segment) + " must be split")
+        #print("new vertex at " + str(position))
+        newkey = self.vertex_key_ctr
+        split_key1 = self.getVertex(splitline.p1)
+        split_key2 = self.getVertex(splitline.p2)
+        #self.createVertex(position)
+        key1 = self.getVertex(segment.p1)
+        key2 = self.getVertex(segment.p2)
+        #print("Key new vertex = " + str(newvertex_key))
+        print("Splitting keys are: " + str(split_key1) + " and " + str(split_key2))
+        print("segment keys are: " + str(key1) +" and " + str(key2))
+        if split_key1 is not None and split_key2 is None:
+            self.createVertex(splitline.p2)
+            self.vertices[split_key1].addNeighbor(self.vertices[newkey])
+            self.vertices[newkey].addNeighbor(self.vertices[split_key1])
+        elif split_key1 is None and split_key2 is not None:
+            self.createVertex(splitlilne.p1)
+            self.vertices[split_key2].addNeighbor(self.vertices[newkey])
+            self.vertices[newkey].addNeighbor(self.vertices[split_key2])
+
+        self.vertices[key1].removeNeighbor(self.vertices[key2])
+        self.vertices[key2].removeNeighbor(self.vertices[key1])
+        self.vertices[key1].addNeighbor(self.vertices[newkey])
+        self.vertices[key2].addNeighbor(self.vertices[newkey])
+        self.vertices[newkey].addNeighbor(self.vertices[key1])
+        self.vertices[newkey].addNeighbor(self.vertices[key2])
+    """
+    def getAllSegments(self):
+        '''Just returns a list of all of the segments.  [(1,2), (2,3), (4,5), ...].
+        as SegmentDirected objects.'''
+        segments = []
+        for key in self.vertices.keys():
+            for i in range(len(self.vertices[key].neighbors)):
+                segments.append(SegmentDirected(self.vertices[key], self.vertices[key].neighbors[i]))
+        return segments
+
+    def createBinaryTree(self):
+        '''Performs the steps necessary to split the segments into a space partitioned binary tree. PRESS B'''
+        segments = self.getAllSegments()
+        self.bsp = BSP(segments)
+        self.testvertexlist = self.bsp.createTree() #just for testing.  Normally doesn't return anything
+        
+    def createVertex(self, position):
+        '''Create a new vertex and add it to the dictionary'''
+        vertex = Vertex(position, key=self.vertex_key_ctr)
+        self.vertices[self.vertex_key_ctr] = vertex
+        self.vertex_key_ctr += 1
+        self.vertexShadow = None
+        
+    def createVertexShadow(self, position):
+        self.vertexShadow = VertexShadow(position)
+
+    def createConnectionLine(self):
+        '''The line that is shown when connecting two nodes together.  vertex0 is where the line is anchored'''
+        self.vertex0 = self.hoverVertex
+        position = self.hoverVertex.position
+        self.connectionLine = Line(position, position, RED)
+
+    def connectVerticesDirected(self):
+        '''Only vertex 1 knows about vertex 2'''
+        print("directed")
+        #print(str(self.vertex0.key) + " ==> " + str(self.hoverVertex.key))
+        self.vertex0.addNeighbor(self.hoverVertex)
+        
+    def connectVerticesUndirected(self):
+        '''Connect two vertices together such that they are neighbors of each other'''
+        print("Undirected")
+        #print(str(self.vertex0.key) + " <==> " + str(self.hoverVertex.key))
+        self.vertex0.addNeighbor(self.hoverVertex)
+        self.hoverVertex.addNeighbor(self.vertex0)
+        
+    def removeNeighbors(self):
+        '''Remove all the neighbors from the vertices'''
+        for vertex in self.vertices.values():
+            vertex.neighbors = []
+
+    def generateMST(self):
+        '''Called when key 9 is pressed'''
+        self.mst = MST(self.vertices)
+
+    def findBaseSectors(self):
+        '''Called when key 8 is pressed'''
+        if self.mst is None:
+            print("Generate the MST first!")
+        else:
+            #print("Finding Base Sectors")
+            segments = utils.diffList(self.mst.graph, self.mst.tree)
+            self.sectors = BaseSectors(self.vertices, segments, self.mst.graph)
+
+    def showNextSector(self):
+        self.sectorIndex += 1
+        if self.sectorIndex >= len(self.sectors.cycles):
+            self.sectorIndex = 0
+        self.showSector()
+
+    def showPreviousSector(self):
+        self.sectorIndex -= 1
+        if self.sectorIndex < 0:
+            self.sectorIndex = len(self.sectors.cycles) - 1
+        self.showSector()
+        
+    def showSector(self):
+        '''Define which cycle to show based on the index'''
+        if len(self.sectors.cycles) > 0:
+            sequence = self.sectors.cycles[self.sectorIndex]
+            print(str(sequence) + " : " + str(len(self.vertices)))
+            self.sectorToShow = Sector(self.vertices, sequence)
+
+    def checkSectorConvex(self):
+        '''Check if the current sector is convex or concave.  True if convex.  Called when key c is pressed.'''
+        if self.sectorToShow is not None:
+            isconvex = self.sectorToShow.convexOrConcave()
+            if isconvex:
+                print("Sector is convex")
+            else:
+                print("Sector is concave")
+        #return isconvex
+
+    def resolveSectorConvexity(self):
+        '''Loop through all of the sectors and check if each sector is convex or concave.  If it is concave, then split that sector into two sectors.  We continue to loop through all the sectors until all of the sectors are convex.  Called when key v is pressed.'''
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("++++++++RESOLVING SECTOR CONVEXITY++++++++++++++++++++")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("")
+        print("--------------------Current Cycles--------------------")
+        for cycle in self.sectors.cycles:
+            print(cycle)
+        print("")
+        allconvex = False
+        while not allconvex:
+            allconvex = True
+            for cycle in self.sectors.cycles:
+                #print("Checking cycle " + str(cycle) + " ..........")
+                self.sectorCheck = Sector(self.vertices, cycle)
+                isconvex = self.sectorCheck.convexOrConcave()
+                if not isconvex:
+                    #print("......" + str(cycle) + " is concave")
+                    allconvex = False
+                    self.sectorCheck.splitSector()
+                    #print("------------------------------")
+                    break
+            
+            self.generateMST()
+            self.findBaseSectors()
+    
+    def checkPointInSector(self):
+        '''For testing.  Check if the probe position (created earlier) is inside  or outside the sector'''
+        print("============CHECKING POINT PROBE===============")
+        if self.sectorToShow is not None:
+            if self.probe is not None:
+                self.sectorToShow.pointInsideSector(self.probe.position)
+            
+    def printVertexInfo(self):
+        '''Print info from the hoverVertex'''
+        print(self.hoverVertex)
+        
+    def render(self):
+        if self.editMode:
+            self.screen.blit(self.background_edit, (0,0))
+        elif self.connectionMode:
+            self.screen.blit(self.background_connection, (0,0))
+        elif self.checkMode:
+            self.screen.blit(self.background_check, (0,0))
+        elif self.probeMode:
+            self.screen.blit(self.background_probe, (0,0))
+        else:
+            self.screen.blit(self.background, (0,0))
+            
+        if self.showGrid:
+            for line in self.grid:
+                line.render(self.screen)
+
+        if self.sectorToShow is not None:
+            self.sectorToShow.render(self.screen)
+        
+        if self.connectionLine is not None:
+            self.connectionLine.render(self.screen)
+    
+        for vertex in self.vertices.values():
+            vertex.renderConnections(self.screen)
+            
+        if self.drawMST:
+            if self.mst is not None:
+                self.mst.render(self.screen)
+
+        if self.showVertices:
+            for vertex in self.vertices.values():
+                vertex.render(self.screen)
+
+        if self.vertexShadow is not None:
+            self.vertexShadow.render(self.screen)
+
+        if self.probe is not None:
+            self.probe.render(self.screen)
+
+        if self.sectorCheck is not None:
+            self.sectorCheck.renderMidpoint(self.screen)
+
+        #This is just to show where the line splits will be made when doing bsp
+        if len(self.testvertexlist) > 0:
+            for b in self.testvertexlist:
+                x, y = int(b.x), int(b.y)
+                pygame.draw.circle(self.screen, (0, 155, 0), (x, y), 5)
+                
+        pygame.display.update()
+
+
+if __name__ == "__main__":
+    game = GameController()
+    game.defineGrid()
+    while True:
+        game.update()
