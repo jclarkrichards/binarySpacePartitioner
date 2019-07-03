@@ -3,11 +3,11 @@ from constants import *
 import utils
 from math import floor
 from Primitives.vectors import Vector2
-from Primitives.vertex import Vertex, VertexShadow, Probe
-from Primitives.lines import Line, SegmentDirected
+from Primitives.vertex import Vertex, VertexShadow
+from Primitives.lines import Line
+from Primitives.segment import SegmentDirected
 from events import EventManager
-from basesectors import BaseSectors
-from sector import Sector
+from Primitives.sector import Sector
 from bsp import BinarySpacePartitioner as BSP
 
 class GameController(object):

@@ -1,6 +1,6 @@
 import pygame
 from Primitives.btree import BinaryTree
-from sector import SectorBSP
+from Primitives.sector import SectorBSP
 
 """Input a list of SegmentDirected objects"""
 class BinarySpacePartitioner(object):

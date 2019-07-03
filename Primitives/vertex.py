@@ -88,14 +88,6 @@ class VertexShadow(object):
         pygame.draw.circle(screen, (200,50,0,100), (x, y), self.radius)
 
 
-class Probe(object):
-    def __init__(self, position):
-        self.position = position
-
-    def render(self, screen):
-        x = int(self.position.x)
-        y = int(self.position.y)
-        pygame.draw.circle(screen, (200,100,0), (x, y), 10)
     
         
           

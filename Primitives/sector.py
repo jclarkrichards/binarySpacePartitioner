@@ -1,7 +1,8 @@
 import pygame
 from constants import *
 from Primitives.vectors import Vector2
-from Primitives.lines import Segment, Ray, SegmentDirected
+from Primitives.segment import Segment, SegmentDirected
+from Primitives.ray import Ray
 from Primitives.vertex import Vertex
 from copy import deepcopy
 """A sector is an area that is defined by a set of vertices.  We can check to see if this sector is convex or concave"""

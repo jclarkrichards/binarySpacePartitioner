@@ -32,5 +32,3 @@ def removeKeys(d, keys):
             d.pop(key)
     return d
 
-def getLeftmostVertex(self):
-    pass
