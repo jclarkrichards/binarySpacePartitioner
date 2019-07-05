@@ -24,7 +24,7 @@ class Ray(object):
         '''Ray-Ray intersection'''
         pass
     
-    def intersectSegment(self, segment, ignoreVertices=False):
+    def intersectSegmentOLD(self, segment, ignoreVertices=False):
         '''Ray-Segment intersection.  Test to see if this ray intersects with a segment.  Just return True of False.  If intersecting the segment at one of its vertices, then we say we intersect it only if the other vertex is above this ray.'''
         p = self.direction
         q = segment.vector
@@ -34,13 +34,6 @@ class Ray(object):
             t = q_p.cross(p) / float(p.cross(q))
             s = utils.clamp(s, 5)
             t = utils.clamp(t, 5)
-            #s = round(s, 5)
-            #t = round(t, 5)
-            #if s == 0.0:
-            #    s = abs(s)
-            #if t == 0.0:
-            #    t = abs(t)
-            #print("s="+str(s)+"      t="+str(t))
             if s > 0:
                 if 0 < t < 1:
                     return True
@@ -56,20 +49,16 @@ class Ray(object):
                                 return True
         return False
 
-    def intersectSegmentAt(self, segment):
-        '''Same as above, except instead of returning True or False, it returns the s value indicating where the intersection is occuring on the segment.  If no intersection, then None is returned.'''
+    def intersectSegment(self, segment):
+        '''Returns the s value indicating where the intersection is occuring on the segment.  If no intersection, then None is returned.'''
         p = self.direction
         q = segment.vector
         if float(p.cross(q)) != 0:
             q_p = segment.vertex1.position - self.position
             s = q_p.cross(q) / float(p.cross(q))
             t = q_p.cross(p) / float(p.cross(q))
-            s = round(s, 5)
-            t = round(t, 5)
-            if s == 0.0:
-                s = abs(s)
-            if t == 0.0:
-                t = abs(t)
+            s = utils.clamp(s, 5)
+            t = utils.clamp(t, 5)
             if s > 0:
                 if 0 < t < 1:
                     return s

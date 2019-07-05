@@ -70,9 +70,11 @@ class Segment(object):
         return (self.vertex1.position + self.vertex2.position) / 2.0
 
     def intersectAsRay(self, other, reverse=False):
-        '''Turn this segment into a line and see if it instersects other Segment objects'''
-        line = Line(self.vertex1.position, self.vertex2.position)
-        ray = line.getRay(reverse=reverse)
+        '''Turn this segment into a ray and see if it instersects other Segment objects'''
+        ray = Ray(self.vertex1.position, self.vector)
+        
+        #line = Line(self.vertex1.position, self.vertex2.position)
+        #ray = line.getRay(reverse=reverse)
         s = ray.intersectSegmentAt(other)
         if s is None:
             return None

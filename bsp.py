@@ -15,8 +15,13 @@ class BinarySpacePartitioner(object):
             self.tree.addSegment(segment)
         isconvex = self.convexSectorCheck()
         if not isconvex:
+            print("-----CONCAVE------")
             bestsector = self.getBestSector()
-        return bestsector #should not return, just for testing
+            return bestsector
+        else:
+            print("----CONVEX--------")
+            return None
+        #return bestsector #should not return, just for testing
             
     def convexSectorCheck(self):
         '''Check if a group of segments defines a convex or concave area'''

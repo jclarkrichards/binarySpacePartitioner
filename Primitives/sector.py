@@ -14,64 +14,48 @@ class Sector(object):
         self.segments = segments
         for seg in self.segments:
             print(seg)
-        self.loops = []
-        self.sortSegments()
+        self.segments = self.sortSegments()
+        print("Sorted Segments")
+        for seg in self.segments:
+            print(seg)
 
     def sortSegments(self):
-        '''It is not guaranteed that the segments will be in any particular order.  By restrictions, the segments should form 1 or more closed loops.'''
+        '''It is not guaranteed that the segments will be in any particular order.  By restrictions, the segments should form 1 closed loop.  
+        This does not happen unless we know ahead of time that we have a single closed loop.'''
         segments = deepcopy(self.segments)
+        temp = []
+        seg = segments.pop(0)
+        temp.append(seg)
         while len(segments) > 0:
-            loop = []
-            seg = segments.pop(0)
-            loop.append(seg)
-            loopfound = False
-
-            while not loopfound: # or num == 10:
-                for segment in segments:
-                    if segment.vertex1.key == seg.vertex2.key:
-                        loop.append(segment)
-                        if segment.vertex2.key == loop[0].vertex1.key:
-                            loopfound = True
-                        seg = segment
-                        segments.remove(segment)
-                        break
-                   
-            self.loops.append(loop)
-            
-        #print("There are " + str(len(self.loops)) + " loops")
-        #for loop in self.loops:
-        #    print("----LOOP-----")
-        #    for seg in loop:
-        #        print(seg)
-        #isconvex = self.convexOrConcave()
-        #print("Is convex = " + str(isconvex))
+            for segment in segments:
+                if segment.vertex1.key == seg.vertex2.key:
+                    temp.append(segment)
+                    seg = segment
+                    segments.remove(segment)
+                    break
+        return temp
         
     def convexOrConcave(self):
         '''Check if the segments define a convex or concave area'''
+        segments = self.segments + [self.segments[0]]
         isconvex = True
-        for loop in self.loops:
-            temploop = loop + [loop[0]]
-            for i in range(len(loop)):
-                vector1 = temploop[i].vertex2.position - temploop[i].vertex1.position
-                vector2 = temploop[i+1].vertex2.position - temploop[i+1].vertex1.position
-                if vector1.cross(vector2) < 0:
-                    isconvex = False
-                    break
-                
+        for i in range(len(self.segments)):
+            vectorA = segments[i].vector
+            vectorB = segments[i+1].vector
+            if vectorA.cross(vectorB) < 0:
+                isconvex = False
+                break
         return isconvex
 
     def electBestSegment(self):
         '''The best segment is the segment that can divide this sector into 2 sectors as equally as possible'''
         test = []
         for segment in self.segments:
-            print("=====================================================")
-            print("Checking segment " + str(segment) + " against other segments")
-            print("=====================================================")
+            #print("=====================================================")
+            #print("Checking segment " + str(segment) + " against other segments")
+            #print("=====================================================")
             for other in self.segments:
                 if other is not segment:
-                    #print("-------------------------------")
-                    #print(other)
-                    #result = segment.intersectAsLine(other)
                     result1 = segment.intersectAsRay(other)
                     result2 = segment.intersectAsRay(other, reverse=True)
                     if result1 is not None:
@@ -80,10 +64,6 @@ class Sector(object):
                     elif result2 is not None:
                         test.append(result2[1])
                     
-                    #if result is not None:
-                    #    print("Intersects " + str(other))
-                        
-                        #test.append(intersects[1])
         return test
 
 """
