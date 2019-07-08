@@ -31,32 +31,16 @@ class Segment(object):
 
     def getRay(self):
         '''Return a Ray representation of this Segment'''
-        return Ray(self.vertex1.position, self.vector.normalize())
+        return Ray(self.vertex1.position, self.vector)
     
     def intersectSegment(self, other):
         '''Segment-Segment intersection.  Segments physically intersect each other'''
-        denom = float(self.vector.cross(other.vector))
-        if denom != 0:
-            q_p = other.vertex1.position - self.vertex1.position
-            s = q_p.cross(other.vector) / denom
-            t = q_p.cross(self.vector) / denom
-            s = utils.clamp(s, 5)
-            t = utils.clamp(t, 5)
-            if 0 < s < 1 and 0 < t < 1:
-                return True
-        return False
-
-    def intersectRay(self, ray):
-        '''Segment-Ray intersection.  Not physically intersect.  Woudl the ray intersect segment if extends to infinity?'''
-        denom = float(self.vector.cross(ray.direction))
-        if denom != 0:
-            q_p = ray.position - self.vertex1.position
-            s = q_p.cross(ray.direction) / denom
-            t = q_p.cross(self.vector) / denom
-            s = utils.clamp(s, 5)
-            t = utils.clamp(t, 5)
-            if 0 < s < 1 and t > 0:
-                return True
+        #print("Does this even happen?")
+        s, t = utils.intersect(self.vertex1.position, other.vertex1.position, 
+                               self.vector, other.vector)
+       
+        if 0 < s < 1 and 0 < t < 1:
+            return True
         return False
 
     def parallel(self, other):
@@ -69,22 +53,27 @@ class Segment(object):
         '''Return the midpoint of this sector.  The midpoint is a Vector2'''
         return (self.vertex1.position + self.vertex2.position) / 2.0
 
-    def intersectAsRay(self, other, reverse=False):
+    def intersectAsRay(self, other):
         '''Turn this segment into a ray and see if it instersects other Segment objects'''
-        ray = Ray(self.vertex1.position, self.vector)
-        
-        #line = Line(self.vertex1.position, self.vertex2.position)
-        #ray = line.getRay(reverse=reverse)
-        s = ray.intersectSegmentAt(other)
-        if s is None:
-            return None
+        ray = self.getRay()
+        s = ray.intersectSegment(other)
+        if s is not None:
+            splitPosition = ray.position + ray.direction*s
+            vertex = Vertex(splitPosition)
+            #return splitPosition
+            if s > 0:
+                return Segment(self.vertex2, vertex)
+            elif s < 0:
+                return Segment(self.vertex1, vertex)
         else:
-            if reverse:
-                pos = self.vertex2.position
-            else:
-                pos = self.vertex1.position
-            splitPosition = pos + ray.direction*s
-            return pos, splitPosition
+            return None
+        
+            #if reverse:
+            #    pos = self.vertex2.position
+            #else:
+            #    pos = self.vertex1.position
+            #splitPosition = pos + ray.direction*s
+            #return pos, splitPosition
 
 
 

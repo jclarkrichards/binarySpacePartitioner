@@ -39,3 +39,21 @@ def removeKeys(d, keys):
             d.pop(key)
     return d
 
+def intersect(p1, p2, v1, v2):
+    '''Find the intersect scalars for both segments/rays.  Just need 2 positions and 2 direction vectors.'''
+    #print(str(p1)+" "+str(p2) + " " + str(v1) + " " + str(v2))
+    s, t = None, None
+    denom = float(v1.cross(v2))
+    if denom != 0:
+        p = p2 - p1
+        s = p.cross(v2) / denom
+        t = p.cross(v1) / denom
+        s = clamp(s, 5)
+        t = clamp(t, 5)
+    return s, t
+
+def evenValue(value):
+    '''Return True if the value is even, False if odd'''
+    return not value % 2
+
+
