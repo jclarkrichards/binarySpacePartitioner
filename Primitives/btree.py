@@ -8,7 +8,8 @@ class TreeNode(object):
         self.left = None
         self.right = None
         self.parent = None
-        
+        self.isConvex = False
+        self.visited = False
 
     
 class BinaryTree(object):
@@ -47,6 +48,13 @@ class BinaryTree(object):
         if self.pointer.parent is not None:
             self.pointer = self.pointer.parent
 
+    def gotoRoot(self):
+        '''Go all the way up to the root node'''
+        self.pointer = self.root
     
-
+    def isleaf(self):
+        '''Check if the node the pointer is pointing to is a leaf or not'''
+        if self.pointer.left is None and self.pointer.right is None:
+            return True
+        return False
     

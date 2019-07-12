@@ -25,7 +25,7 @@ class Ray(object):
         s, t = utils.intersect(self.position, segment.vertex1.position, 
                                self.direction, segment.vector)
         
-        print(s, t)
+        #print(s, t)
         if 0 < t < 1:
             return s
         return None

@@ -29,7 +29,7 @@ class Sector(object):
         temp.append(seg)
         while len(segments) > 0:
             for segment in segments:
-                if segment.vertex1.key == seg.vertex2.key:
+                if segment.vertex1.position == seg.vertex2.position:
                     temp.append(segment)
                     seg = segment
                     segments.remove(segment)
@@ -48,32 +48,65 @@ class Sector(object):
                 break
         return isconvex
 
+    #Might want to try and split this method so that it is not so big and complex
     def electBestSegment(self):
         '''The best segment is the segment that can divide this sector into 2 sectors as equally as possible'''
         print("Electing the best segment for splitting")
-        test = []
-        for segment in self.segments:   
-            temp = []
+        bestSegment = None
+        bestSegments = []
+        bestNewSegments = []
+        segmentsToSplit = [] #These are the segments that would need to be split in half
+        for segment in self.segments:
+            tempSegments = []
+            tempNewSegments = []
+            others = []
             for other in self.segments:              
                 if other is not segment:
                     #print("Checking " + str(segment) + " against "+ str(other))
                     #print("=====================================================")
                     newsegment = segment.intersectAsRay(other)
-                    if newsegment is not None:
-                        for other2 in self.segments:
+                    if newsegment is not None: #segment ray intersects other
+                        for other2 in self.segments: #check to see if the new segment intersects with any of the segments
                             intersects = False
                             if newsegment.intersectSegment(other2):
                                 intersects = True
                                 break
                         if not intersects:              
                             #Now need to check if the new segment is completely inside or outside of the sector
+                            #We want to be completely inside the sector
                             if self.pointInsideSector(newsegment.midpoint()):
-                                temp.append(newsegment.vertex2.position)
-            print(str(segment) + " intersect with " + str(len(temp)) + " segments.")
-            if len(temp) == 1:
-                test += temp
-                                        
-        return test
+                                tempSegments.append(segment)
+                                tempNewSegments.append(newsegment)
+                                others.append(other)
+                                #temp.append(newsegment.vertex2.position)
+            #print(str(segment) + " intersect with " + str(len(temp)) + " segments.")
+            #We only want segments that intersect 1 other segment
+            if len(tempNewSegments) == 1:
+                bestSegments += tempSegments
+                bestNewSegments += tempNewSegments
+                segmentsToSplit += others
+                
+
+        #From this list of splitting segments, choose the one that splits the segment as close to the middle as possible.
+        values = []
+        for i in range(len(bestNewSegments)):
+            value = bestNewSegments[i].intersectSegmentEndpoints(segmentsToSplit[i])
+            values.append(abs(value - 0.5))
+        bestIndex = values.index(min(values))
+
+        bestNewSegment = bestNewSegments[bestIndex]
+        segment1, segment2 = segmentsToSplit[bestIndex].split(bestNewSegment)
+        self.segments.append(bestNewSegment)
+        self.segments.append(Segment(bestNewSegment.vertex2, bestNewSegment.vertex1))
+        self.segments.append(segment1)
+        self.segments.append(segment2)
+        self.segments.remove(segmentsToSplit[bestIndex])
+        return bestSegments[bestIndex]
+        #return bestSegments[bestIndex], bestNewSegments[bestIndex], segmentsToSplit[bestIndex]
+        #return [bestNewSegments[bestIndex]]
+        #return self.segments
+
+    
 
     def pointInsideSector(self, point):
         '''point is a Vector2.  Check if a point is inside the sector or outside the sector.  Create a ray that points to the right.  Loop through each segment that makes up this sector and count how many sectors this ray crosses.  If that number is odd, the point is inside the sector.  If even, the point is outside.'''

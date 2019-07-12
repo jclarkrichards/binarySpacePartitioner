@@ -43,7 +43,7 @@ class GameController(object):
         
     def setBackground(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
-        self.background.fill(BLACK)
+        self.background.fill(DARKGRAY)
         self.background_edit = pygame.surface.Surface(SCREENSIZE).convert()
         self.background_edit.fill(BACKGROUNDEDIT)
         self.background_connection = pygame.surface.Surface(SCREENSIZE).convert()
@@ -52,7 +52,8 @@ class GameController(object):
         self.background_check.fill(CHECKMODECOLOR)
         self.background_probe = pygame.surface.Surface(SCREENSIZE).convert()
         self.background_probe.fill(PROBEMODECOLOR)
-
+        self.segments = [] #make global for testing so we can see them dynamically
+        
     def defineGrid(self):
         '''Defines vertical and horizontal lines'''
         #Define vertical lines
@@ -110,9 +111,10 @@ class GameController(object):
 
     def createBinaryTree(self):
         '''Performs the steps necessary to split the segments into a space partitioned binary tree. PRESS B'''
-        segments = self.getAllSegments()
-        self.bsp = BSP(segments)
-        self.testvertexlist = self.bsp.createTree() #just for testing.  Normally doesn't return anything
+        self.segments = self.getAllSegments()
+        self.bsp = BSP(self.segments)
+        self.bsp.createTree() #just for testing.  Normally doesn't return anything
+        self.segments = self.bsp.segments
         
     def createVertex(self, position):
         '''Create a new vertex and add it to the dictionary'''
@@ -177,9 +179,15 @@ class GameController(object):
 
         #This is just to show where the line splits will be made when doing bsp
         if len(self.testvertexlist) > 0:
+            #self.testvertexlist.render(self.screen)
             for b in self.testvertexlist:
-                x, y = int(b.x), int(b.y)
-                pygame.draw.circle(self.screen, (0, 155, 0), (x, y), 5)
+                b.render(self.screen)
+                #x, y = int(b.x), int(b.y)
+                #pygame.draw.circle(self.screen, (0, 155, 0), (x, y), 5)
+
+        if len(self.segments) > 0:
+            for seg in self.segments:
+                seg.render(self.screen)
                 
         pygame.display.update()
 

@@ -43,6 +43,14 @@ class Segment(object):
             return True
         return False
 
+    def intersectSegmentEndpoints(self, other):
+        '''In a special case we want to know when this segment is intersecting the other segment only at this segments endpoints'''
+        s, t = utils.intersect(self.vertex1.position, other.vertex1.position,
+                               self.vector, other.vector)
+        if (s == 0 or s == 1) and 0 < t < 1:
+            return t
+        return None
+            
     def parallel(self, other):
         '''Check if this segment is parallel with the other segment'''
         if float(self.vector.cross(other.vector)) == 0:
@@ -75,6 +83,24 @@ class Segment(object):
             #splitPosition = pos + ray.direction*s
             #return pos, splitPosition
 
+    def split(self, other):
+        '''Split this segment into 2 segments and return those segments.  We already know where the intersection occurs, we just need to know if others vertex1 or vertex2 makes the intersection.'''
+        s, t = utils.intersect(self.vertex1.position, other.vertex1.position,
+                               self.vector, other.vector)
+        if t == 0:
+            segment1 = Segment(self.vertex1, other.vertex1)
+            segment2 = Segment(other.vertex1, self.vertex2)
+        elif t == 1:
+            segment1 = Segment(self.vertex1, other.vertex2)
+            segment2 = Segment(other.vertex2, self.vertex2)
 
+        return segment1, segment2
+    
+    def render(self, screen):
+        x, y = self.vertex2.position.toTuple()
+        x, y = int(x), int(y)
+        pygame.draw.circle(screen, (0, 150, 0), (x, y), 5)
+        pygame.draw.line(screen, (255,255,0), self.vertex1.position.toTuple(),
+                         self.vertex2.position.toTuple(), 3)
 
     
