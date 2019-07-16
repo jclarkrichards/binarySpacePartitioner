@@ -8,7 +8,7 @@ class TreeNode(object):
         self.left = None
         self.right = None
         self.parent = None
-        self.isConvex = False
+        self.isConvex = True
         self.visited = False
 
     

@@ -22,31 +22,50 @@ class BinarySpacePartitioner(object):
         self.findLeaf()
         if self.tree.pointer is not self.tree.root:
             self.sectorCheck()
-        
+
+    def traverseLeft(self):
+        '''go to the left node'''
+        self.tree.gotoLeft()
+        self.findLeaf()
+
+    def traverseRight(self):
+        '''go to the right node'''
+        self.tree.gotoRight()
+        self.findLeaf()
+
+    def traverseToParent(self):
+        '''Go back to the parent'''
+        self.tree.pointer.visited = True
+        self.tree.gotoParent()
+        self.findLeaf()
+    
     def findLeaf(self):
         if self.tree.isleaf():
             if self.tree.pointer.isConvex:
-                self.tree.pointer.visited = True
-                self.tree.gotoParent()
-                self.findLeaf()
+                self.traverseToParent()
             else:
                 print("found our concave leaf")
                 
         else:
             if self.tree.pointer.left is not None:
                 if not self.tree.pointer.left.visited:
-                    self.tree.gotoLeft()
-                    self.findLeaf()
+                    self.traverseLeft()
                 else:
                     if self.tree.pointer.right is not None:
                         if not self.tree.pointer.right.visited:
-                            self.tree.gotoRight()
-                            self.findLeaf()
+                            self.traverseRight()
                         else:
-                            self.tree.pointer.visited = True
-                            self.tree.gotoParent()
-                            self.findLeaf()
-                
+                            self.traverseToParent()
+                    else:
+                        self.traverseToParent()
+            else:
+                if self.tree.pointer.right is not None:
+                    if not self.tree.pointer.right.visited:
+                        self.traverseRight()
+                    else:
+                        self.traverseToParent()
+                else:
+                    self.traverseToParent()
             
     
     def sectorCheck(self):
