@@ -7,6 +7,40 @@ def clamp(value, precision):
         val = abs(val)
     return val
 
+def vectorOnRight(segment, other):
+    '''Check if the other vector is to the right of vector.  Return True'''
+    v1 = other.vertex1.position - segment.vertex1.position
+    v2 = other.vertex2.position - segment.vertex1.position
+    val1 = segment.vector.cross(v1)
+    val2 = segment.vector.cross(v2)
+    val1 = clamp(val1, 5)
+    val2 = clamp(val2, 5)
+    print(val1, val2)
+    if val1 > 0 or val2 > 0:
+        return True
+    return False
+
+def vectorOnLeft(segment, other):
+    '''Check if the other vector is to the left of vector.  Return True'''
+    v1 = other.vertex1.position - segment.vertex1.position
+    v2 = other.vertex2.position - segment.vertex1.position
+    val1 = segment.vector.cross(v1)
+    val2 = segment.vector.cross(v2)
+    val1 = clamp(val1, 5)
+    val2 = clamp(val2, 5)
+    print(val1, val2)
+    if val1 < 0 or val2 < 0:
+        return True
+    return False
+
+def sameDirection(segment, other):
+    '''Check to see if the other segment points in the same direction as segment'''
+    angle = segment.vector.angle(other.vector)
+    angle = clamp(angle, 5)
+    if angle == 0:
+        return True
+    return False
+
 def pairExists(pair, pairlist):
     '''Check if the pair is in the pairlist.  pairlist is a list of tuples and pair is a list'''
     pair2 = deepcopy(pair)

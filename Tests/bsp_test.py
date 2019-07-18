@@ -32,6 +32,7 @@ class BinarySpacePartitioner(object):
         self.tree.addRight()
         self.tree.gotoLeft()
         self.tree.addData(18)
+        #self.tree.pointer.isConvex = False
         self.tree.gotoParent()
         self.tree.gotoRight()
         self.tree.addData(23)
@@ -49,7 +50,6 @@ class BinarySpacePartitioner(object):
         self.tree.addRight()
         self.tree.gotoLeft()
         self.tree.addData(34)
-        self.tree.pointer.isConvex = False
         self.tree.gotoParent()
         self.tree.gotoRight()
         self.tree.addData(1)
@@ -64,7 +64,26 @@ class BinarySpacePartitioner(object):
         self.findLeaf()
         print("Finished traversing the TREE")
         print(self.tree.pointer.data)
-        
+
+    def canTraverseLeft(self):
+        '''Check if able to move to the left child node'''
+        if self.tree.pointer.left is not None:
+            if not self.tree.pointer.left.visited:
+                return True
+        return False
+
+    def canTraverseRight(self):
+        '''Check if able to move to the right child node'''
+        if self.tree.pointer.right is not None:
+            if not self.tree.pointer.right.visited:
+                return True
+        return False
+
+    def canTraverseToParent(self):
+        if self.tree.pointer.parent is not None:
+            return True
+        return False
+    
     def traverseLeft(self):
         '''go to the left node'''
         self.tree.gotoLeft()
@@ -89,29 +108,15 @@ class BinarySpacePartitioner(object):
             else:
                 print("found our concave leaf")        
         else:
-            if self.tree.pointer.left is not None:
-                if not self.tree.pointer.left.visited:
-                    self.traverseLeft()
-                else:
-                    if self.tree.pointer.right is not None:
-                        if not self.tree.pointer.right.visited:
-                            self.traverseRight()
-                        else:
-                            if self.tree.pointer.parent is not None:
-                                self.traverseToParent()
-                            else:
-                                print("Finished.  All are convex.")
-                    else:
-                        self.traverseToParent()
+            if self.canTraverseLeft():
+                self.traverseLeft()
+            elif self.canTraverseRight():
+                self.traverseRight()
+            elif self.canTraverseToParent():
+                self.traverseToParent()
             else:
-                if self.tree.pointer.right is not None:
-                    if not self.tree.pointer.right.visited:
-                        self.traverseRight()
-                    else:
-                        self.traverseToParent()
-                else:
-                    self.traverseToParent()
-            
+                print("Finished, All are convex")
+
     
 bsp = BinarySpacePartitioner()
 bsp.traverseTree()
