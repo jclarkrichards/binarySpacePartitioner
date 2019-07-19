@@ -1,11 +1,19 @@
 from copy import deepcopy
+from Primitives.vectors import Vector2
 
 def clamp(value, precision):
     '''Clamp a value'''
-    val = round(value, precision)
+    val = round(value, 2)
+    #val = round(value)
     if val == 0.0:
         val = abs(val)
     return val
+
+def clampVector(vector, precision):
+    '''Clamp a vector, similar to above.  Return the clamped vector'''
+    x = clamp(vector.x, precision)
+    y = clamp(vector.y, precision)
+    return Vector2(x, y)
 
 def vectorOnRight(segment, other):
     '''Check if the other vector is to the right of vector.  Return True'''
@@ -15,7 +23,7 @@ def vectorOnRight(segment, other):
     val2 = segment.vector.cross(v2)
     val1 = clamp(val1, 5)
     val2 = clamp(val2, 5)
-    print(val1, val2)
+    #print(val1, val2)
     if val1 > 0 or val2 > 0:
         return True
     return False
@@ -28,7 +36,7 @@ def vectorOnLeft(segment, other):
     val2 = segment.vector.cross(v2)
     val1 = clamp(val1, 5)
     val2 = clamp(val2, 5)
-    print(val1, val2)
+    #print(val1, val2)
     if val1 < 0 or val2 < 0:
         return True
     return False

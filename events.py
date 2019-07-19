@@ -48,6 +48,8 @@ class EventManager(object):
                     self.controller.showVertices = not self.controller.showVertices
                 if event.key == K_b:
                     self.controller.createBinaryTree()
+                if event.key == K_t:
+                    self.controller.stepThroughTree()
                     
             if event.type == MOUSEBUTTONDOWN:
                 if self.controller.editMode:

@@ -114,7 +114,12 @@ class GameController(object):
         self.segments = self.getAllSegments()
         self.bsp = BSP(self.segments)
         self.bsp.createTree() #just for testing.  Normally doesn't return anything
-        self.segments = self.bsp.segments
+        self.segments = self.bsp.segmentList
+
+    def stepThroughTree(self):
+        '''This just helps me step through the tree one iteration at a time to see what it is doing for debugging.'''
+        self.bsp.traverseTree()
+        self.segments = self.bsp.segmentList
         
     def createVertex(self, position):
         '''Create a new vertex and add it to the dictionary'''
@@ -182,8 +187,6 @@ class GameController(object):
             #self.testvertexlist.render(self.screen)
             for b in self.testvertexlist:
                 b.render(self.screen)
-                #x, y = int(b.x), int(b.y)
-                #pygame.draw.circle(self.screen, (0, 155, 0), (x, y), 5)
 
         if len(self.segments) > 0:
             for seg in self.segments:

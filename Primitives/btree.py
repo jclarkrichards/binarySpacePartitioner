@@ -21,6 +21,16 @@ class BinaryTree(object):
         '''Add a segment to the node that is being pointed at currently.'''
         self.pointer.data.append(segment)
 
+    def addSegmentLeft(self, segment):
+        '''Add the segment to the left child of node the pointer is pointing to.  Create child if it does not exist.'''
+        self.addLeft()
+        self.pointer.left.data.append(segment)
+        
+    def addSegmentRight(self, segment):
+        '''Add the segment to the right child of node the pointer is pointing to.  Create child if it does not exist.'''
+        self.addRight()
+        self.pointer.right.data.append(segment)
+    
     def addData(self, data):
         self.pointer.data.append(data)
         

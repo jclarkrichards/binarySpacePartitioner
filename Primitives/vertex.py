@@ -1,12 +1,15 @@
 import pygame
 from constants import *
 from Primitives.vectors import Vector2
-
+import utils
 """A Vertex is just a point in space with an x and y position.  Visually (when drawing) it is a red circle.  All of the vertices are stored in a dictionary, so the key variable is the key in the dictionary this vertex is found.  This value does not change.  The position is just a Vector2.  The neighbors list is a list of Vertex objects that this Vertex points to."""
 class Vertex(object):
     def __init__(self, position, key=0):
         self.key = key
+        #print(type(position))
         self.position = position
+        #self.position = utils.clampVector(position, 2)
+        #print(self.position)
         self.neighbors = []
         self.color = RED
         self.radius = 10 #for display and mouse detection

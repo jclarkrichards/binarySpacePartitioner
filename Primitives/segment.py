@@ -10,15 +10,16 @@ from Primitives.ray import Ray
 A segment has two points.  It just forms a straight line between these two points.  We do not have to actually draw this.  I draw the segments in a better way.  This just exists in order to determine the point of intersection between 2 Segments.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"""
 class Segment(object):
-    def __init__(self, vertex1, vertex2):
+    def __init__(self, vertex1, vertex2, virtual=False):
         '''The input objects should be of type Vertex since a segment contains 2 Vertex objects in order to define it.  A segment is a directed segment and points from vertex1 to vertex2.'''
         self.vertex1 = vertex1
         self.vertex2 = vertex2
         self.vector = self.vertex2.position - self.vertex1.position
+        self.virtual = virtual
         
     def __str__(self):
         '''Return a string representation of a Segment'''
-        return str(self.vertex1.key) + " ---> " + str(self.vertex2.key)
+        return str(self.vertex1.position) + " ---> " + str(self.vertex2.position)
 
     def __eq__(self, other):
         '''Two segments are equal if they have the same vertices'''
@@ -45,8 +46,10 @@ class Segment(object):
 
     def intersectSegmentEndpoints(self, other):
         '''In a special case we want to know when this segment is intersecting the other segment only at this segments endpoints'''
+        #print("Checking endpoint intersections")
         s, t = utils.intersect(self.vertex1.position, other.vertex1.position,
                                self.vector, other.vector)
+        #print(s, t)
         if (s == 0 or s == 1) and 0 < t < 1:
             return t
         return None
@@ -70,9 +73,9 @@ class Segment(object):
             vertex = Vertex(splitPosition)
             #return splitPosition
             if s > 0:
-                return Segment(self.vertex2, vertex)
+                return Segment(self.vertex2, vertex, True)
             elif s < 0:
-                return Segment(self.vertex1, vertex)
+                return Segment(self.vertex1, vertex, True)
         else:
             return None
         
@@ -88,19 +91,23 @@ class Segment(object):
         s, t = utils.intersect(self.vertex1.position, other.vertex1.position,
                                self.vector, other.vector)
         if t == 0:
-            segment1 = Segment(self.vertex1, other.vertex1)
-            segment2 = Segment(other.vertex1, self.vertex2)
+            segment1 = Segment(self.vertex1, other.vertex1, self.virtual)
+            segment2 = Segment(other.vertex1, self.vertex2, self.virtual)
         elif t == 1:
-            segment1 = Segment(self.vertex1, other.vertex2)
-            segment2 = Segment(other.vertex2, self.vertex2)
+            segment1 = Segment(self.vertex1, other.vertex2, self.virtual)
+            segment2 = Segment(other.vertex2, self.vertex2, self.virtual)
 
         return segment1, segment2
     
     def render(self, screen):
         x, y = self.vertex2.position.toTuple()
         x, y = int(x), int(y)
+        if self.virtual:
+            color = (255,255,255)
+        else:
+            color = (255,255,0)
         pygame.draw.circle(screen, (0, 150, 0), (x, y), 5)
-        pygame.draw.line(screen, (255,255,0), self.vertex1.position.toTuple(),
+        pygame.draw.line(screen, color, self.vertex1.position.toTuple(),
                          self.vertex2.position.toTuple(), 3)
 
     
