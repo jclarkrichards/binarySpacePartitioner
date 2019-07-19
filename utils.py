@@ -3,7 +3,7 @@ from Primitives.vectors import Vector2
 
 def clamp(value, precision):
     '''Clamp a value'''
-    val = round(value, 2)
+    val = round(value, 3)
     #val = round(value)
     if val == 0.0:
         val = abs(val)

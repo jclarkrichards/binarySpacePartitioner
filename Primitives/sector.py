@@ -62,8 +62,8 @@ class Sector(object):
     #Might want to try and split this method so that it is not so big and complex
     def electBestSegment(self):
         '''The best segment is the segment that can divide this sector into 2 sectors as equally as possible'''
-        #print("Electing the best segment for splitting")
-        #print("Number of segments = " + str(len(self.segments)))
+        print("Electing the best segment for splitting")
+        print("Number of segments = " + str(len(self.segments)))
         bestSegment = None
         bestSegments = []
         bestNewSegments = []
@@ -98,23 +98,24 @@ class Sector(object):
                 bestNewSegments += tempNewSegments
                 segmentsToSplit += others
                 
-
+        print("BEST SEGMENTS TO CHOOSE FROM= " + str(len(bestSegments)))
         #From this list of splitting segments, choose the one that splits the segment as close to the middle as possible.
         values = []
         for i in range(len(bestNewSegments)):
             value = bestNewSegments[i].intersectSegmentEndpoints(segmentsToSplit[i])
-            #if value is not None:
-            values.append(abs(value - 0.5))
-        bestIndex = values.index(min(values))
+            if value is not None:
+                values.append(abs(value - 0.5))
+        if len(values) > 0:
+            bestIndex = values.index(min(values))
 
-        bestNewSegment = bestNewSegments[bestIndex]
-        segment1, segment2 = segmentsToSplit[bestIndex].split(bestNewSegment)
-        self.segments.append(bestNewSegment)
-        self.segments.append(Segment(bestNewSegment.vertex2, bestNewSegment.vertex1, True))
-        self.segments.append(segment1)
-        self.segments.append(segment2)
-        self.segments.remove(segmentsToSplit[bestIndex])
-        return bestSegments[bestIndex]
+            bestNewSegment = bestNewSegments[bestIndex]
+            segment1, segment2 = segmentsToSplit[bestIndex].split(bestNewSegment)
+            self.segments.append(bestNewSegment)
+            self.segments.append(Segment(bestNewSegment.vertex2, bestNewSegment.vertex1, True))
+            self.segments.append(segment1)
+            self.segments.append(segment2)
+            self.segments.remove(segmentsToSplit[bestIndex])
+            return bestSegments[bestIndex]
         #return bestSegments[bestIndex], bestNewSegments[bestIndex], segmentsToSplit[bestIndex]
         #return [bestNewSegments[bestIndex]]
         #return self.segments
