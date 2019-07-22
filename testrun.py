@@ -3,8 +3,8 @@ from constants import *
 #import utils
 from math import floor
 from Primitives.vectors import Vector2
-from Primitives.vertex import Vertex, VertexShadow
-from Primitives.lines import Line
+#from Primitives.vertex import Vertex, VertexShadow
+#from Primitives.lines import Line
 from Primitives.segment import Segment
 from events import EventManager
 from bsp import BinarySpacePartitioner as BSP
@@ -41,6 +41,7 @@ class GameController(object):
         self.vertex_key_ctr = 0
         self.bsp = None
         self.testvertexlist = []
+        self.segments = [] #make global for testing so we can see them dynamically
         
     def setBackground(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
@@ -53,8 +54,10 @@ class GameController(object):
         self.background_check.fill(CHECKMODECOLOR)
         self.background_probe = pygame.surface.Surface(SCREENSIZE).convert()
         self.background_probe.fill(PROBEMODECOLOR)
-        self.segments = [] #make global for testing so we can see them dynamically
         
+     
+        
+    """
     def defineGrid(self):
         '''Defines vertical and horizontal lines'''
         #Define vertical lines
@@ -64,12 +67,13 @@ class GameController(object):
         #Define horizontal lines
         for i in range(NROWS):
             self.grid.append(Line(Vector2(0, i*TILEHEIGHT),Vector2(SCREENWIDTH, i*TILEHEIGHT), GRAY))
-
+    """
     def update(self):
         '''Main game loop'''
         x, y = pygame.mouse.get_pos()
         mouseposition = Vector2(x, y)
 
+        """
         self.hoverVertex = None
         for vertex in self.vertices.values():
             if vertex.inbounds(mouseposition):
@@ -90,22 +94,46 @@ class GameController(object):
 
         if self.connectionLine is not None:
             self.connectionLine.vector1 = mouseposition
-        
+        """
         self.events.update(mouseposition)
         self.render()
 
+    """
     def getVertex(self, position):
         '''Return the key to the vertex that matches the position.  Return None if no matches.'''
         for key in self.vertices.keys():
             if self.vertices[key].position == position:
                 return key
         return None
+    """
+
+
+
+
 
     def getTestSector(self):
-        '''From the testsectors file.  '''
+        '''From the testsectors file.  Press button 5'''
         L = testsectors.sector1()
+        print(L)
+        self.segments = []
+        for pair in L:     
+            v1 = Vector2(pair[0])
+            v2 = Vector2(pair[1])
+            self.segments.append(Segment(v1, v2, name=pair[2]))
 
-    
+
+        self.bsp = BSP(self.segments)
+        self.bsp.createTree()
+
+
+
+    def stepThroughTree(self):
+        '''This just helps me step through the tree one iteration at a time to see what it is doing for debugging.'''
+        self.bsp.traverseTree()
+        self.segments = self.bsp.segmentList
+
+
+    """
     def getAllSegments(self):
         '''Just returns a list of all of the segments.  [(1,2), (2,3), (4,5), ...].
         as SegmentDirected objects.'''
@@ -122,10 +150,7 @@ class GameController(object):
         self.bsp.createTree() #just for testing.  Normally doesn't return anything
         self.segments = self.bsp.segmentList
 
-    def stepThroughTree(self):
-        '''This just helps me step through the tree one iteration at a time to see what it is doing for debugging.'''
-        self.bsp.traverseTree()
-        self.segments = self.bsp.segmentList
+    
         
     def createVertex(self, position):
         '''Create a new vertex and add it to the dictionary'''
@@ -158,7 +183,7 @@ class GameController(object):
         '''Remove all the neighbors from the vertices'''
         for vertex in self.vertices.values():
             vertex.neighbors = []
-
+    """
     def render(self):
         if self.editMode:
             self.screen.blit(self.background_edit, (0,0))
@@ -170,7 +195,7 @@ class GameController(object):
             self.screen.blit(self.background_probe, (0,0))
         else:
             self.screen.blit(self.background, (0,0))
-            
+        """
         if self.showGrid:
             for line in self.grid:
                 line.render(self.screen)
@@ -187,12 +212,14 @@ class GameController(object):
 
         if self.vertexShadow is not None:
             self.vertexShadow.render(self.screen)
-
+        
         #This is just to show where the line splits will be made when doing bsp
+
         if len(self.testvertexlist) > 0:
             #self.testvertexlist.render(self.screen)
             for b in self.testvertexlist:
                 b.render(self.screen)
+        """
 
         if len(self.segments) > 0:
             for seg in self.segments:
@@ -203,6 +230,7 @@ class GameController(object):
 
 if __name__ == "__main__":
     game = GameController()
-    game.defineGrid()
+    #game.defineGrid()
     while True:
         game.update()
+

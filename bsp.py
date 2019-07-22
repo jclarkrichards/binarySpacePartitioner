@@ -109,14 +109,21 @@ class BinarySpacePartitioner(object):
 
     def getBestSegment(self):
         '''elect a segment from the segmentList to remain on the node.  Then move the other segments down to the child nodes depending on left or right status.'''
-        print("Getting the best segment")
+        print("++++++++++++++++++++Getting the best segment++++++++++++++")
         segments = self.tree.pointer.data
+        print("Number of segments : " + str(len(segments)))
         sector = Sector(segments)
         bestSegment = sector.electBestSegment()
-        self.segments = sector.segments
-        self.segmentList += self.segments #Only for display purposes so I can see all the segments even if there are duplicates.
-        self.tree.pointer.data = [bestSegment]
-        self.divideSegments(bestSegment, self.segments)
+        print("Best segment is " + str(bestSegment))
+
+
+        #self.segments = sector.segments
+        #self.segmentList += self.segments #Only for display purposes so I can see all the segments even if there are duplicates.
+        #self.tree.pointer.data = [bestSegment]
+        #self.divideSegments(bestSegment, self.segments)
+
+
+
         #print("Segment = " + str(segment))
         #print("New Segment = " + str(newSegment))
         #print("Split Segment = " + str(splitSegment))

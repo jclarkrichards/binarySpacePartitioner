@@ -17,8 +17,8 @@ def clampVector(vector, precision):
 
 def vectorOnRight(segment, other):
     '''Check if the other vector is to the right of vector.  Return True'''
-    v1 = other.vertex1.position - segment.vertex1.position
-    v2 = other.vertex2.position - segment.vertex1.position
+    v1 = other.p1 - segment.p1
+    v2 = other.p2 - segment.p1
     val1 = segment.vector.cross(v1)
     val2 = segment.vector.cross(v2)
     val1 = clamp(val1, 5)
@@ -30,8 +30,8 @@ def vectorOnRight(segment, other):
 
 def vectorOnLeft(segment, other):
     '''Check if the other vector is to the left of vector.  Return True'''
-    v1 = other.vertex1.position - segment.vertex1.position
-    v2 = other.vertex2.position - segment.vertex1.position
+    v1 = other.p1 - segment.p1
+    v2 = other.p2 - segment.p1
     val1 = segment.vector.cross(v1)
     val2 = segment.vector.cross(v2)
     val1 = clamp(val1, 5)

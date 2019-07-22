@@ -50,6 +50,8 @@ class EventManager(object):
                     self.controller.createBinaryTree()
                 if event.key == K_t:
                     self.controller.stepThroughTree()
+                if event.key == K_5:
+                    self.controller.getTestSector()
                     
             if event.type == MOUSEBUTTONDOWN:
                 if self.controller.editMode:

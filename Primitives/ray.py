@@ -22,10 +22,7 @@ class Ray(object):
 
     def intersectSegment(self, segment):
         '''Returns the s value indicating where the intersection is occuring on the segment.  If no intersection, then None is returned. If s is negative, then the intersection is happening behind it.'''
-        s, t = utils.intersect(self.position, segment.vertex1.position, 
-                               self.direction, segment.vector)
-        
-        #print(s, t)
+        s, t = utils.intersect(self.position, segment.p1, self.direction, segment.vector)
         if 0 < t < 1:
             return s
         return None

@@ -32,6 +32,8 @@
     <Compile Include="Primitives\vertex.py" />
     <Compile Include="Primitives\__init__.py" />
     <Compile Include="run.py" />
+    <Compile Include="testrun.py" />
+    <Compile Include="testsectors.py" />
     <Compile Include="utils.py" />
   </ItemGroup>
   <ItemGroup>
