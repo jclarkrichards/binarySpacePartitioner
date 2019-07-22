@@ -33,6 +33,10 @@ class BinarySpacePartitioner(object):
         #if self.tree.pointer is not self.tree.root:
         #    self.sectorCheck()
 
+    def traverseTreeTest(self):
+        self.tree.gotoRoot()
+        self.findLeafTest()
+
     def canTraverseLeft(self):
         '''Check if able to move to the left child node'''
         if self.tree.pointer.left is not None:
@@ -64,6 +68,18 @@ class BinarySpacePartitioner(object):
         self.tree.gotoRight()
         self.findLeaf()
 
+    def traverseLeftTest(self):
+        '''go to the left node'''
+        print("<----LEFT")
+        self.tree.gotoLeft()
+        self.findLeafTest()
+
+    def traverseRightTest(self):
+        '''go to the right node'''
+        print("RIGHT---->")
+        self.tree.gotoRight()
+        self.findLeafTest()
+
     def traverseToParent(self):
         '''Go back to the parent'''
         print("^^^PARENT^^^")
@@ -77,13 +93,44 @@ class BinarySpacePartitioner(object):
                 self.traverseToParent()
             else:
                 print("----------CONCAVE LEAF---------")
+                for seg in self.tree.pointer.data:
+                    print(seg)
+                print("")
+                print("")
+                print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print("")
+                print("")
                 self.getBestSegment()
-                #self.sectorCheck()
         else:
             if self.canTraverseLeft():
                 self.traverseLeft()
             elif self.canTraverseRight():
                 self.traverseRight()
+            elif self.canTraverseToParent():
+		self.traverseToParent()
+            else:
+                print("Finished... All are convex")            
+    
+    def findLeafTest(self):
+        if self.tree.isleaf():
+            if self.tree.pointer.isConvex:
+                self.traverseToParent()
+            else:
+                print("----------CONCAVE LEAF---------")
+                for seg in self.tree.pointer.data:
+                    print(seg)
+                print("")
+                print("")
+                print("")
+                #self.getBestSegment()
+                #self.sectorCheck()
+        else:
+            if self.canTraverseLeft():
+                self.traverseLeftTest()
+            elif self.canTraverseRight():
+                self.traverseRightTest()
             elif self.canTraverseToParent():
 		self.traverseToParent()
             else:
@@ -128,7 +175,7 @@ class BinarySpacePartitioner(object):
 
 
         #self.tree.pointer.data = [bestSegment]
-        #self.divideSegments(bestSegment, self.segments)
+        self.divideSegments(bestSegment, self.segments)
 
 
 
@@ -146,29 +193,46 @@ class BinarySpacePartitioner(object):
         print(str(len(segments)) + " to divide up into LEFT and RIGHT")
         #print(mainSegment)
         #print("---------------------")
+        self.tree.pointer.data = [mainSegment]
         for segment in segments:
-            #print(segment)
-            rightside = utils.vectorOnRight(mainSegment, segment)
-            leftside = utils.vectorOnLeft(mainSegment, segment)
-            #print("Pointing to: " + str(self.tree.pointer))
-            if rightside and not leftside:
-                print("Segment is on the right------------>")
-                self.tree.addSegmentRight(segment)
-            elif leftside and not rightside:
-                print("<--------------Segment is on the left")
-                self.tree.addSegmentLeft(segment)
-            elif not rightside and not leftside:
-                if utils.sameDirection(mainSegment, segment):
-                    print("On same line... go to the right------------------>")
+            print(segment)
+            if False:
+            #    if segment.forceTreeSide is "RIGHT":
+            #        self.tree.addSegmentRight(segment)
+            #        print("FORCE RIGHT------>")
+            #    elif segment.forceTreeSide is "LEFT":
+            #        self.tree.addSegmentLeft(segment)
+            #        print("<----FORCE LEFT")
+            #    segment.forceTreeSide = None
+                pass
+            else:
+                rightside = utils.vectorOnRight(mainSegment, segment)
+                leftside = utils.vectorOnLeft(mainSegment, segment)
+                print("RIGHT: " + str(rightside) + " LEFT: " + str(leftside))
+                #print("Pointing to: " + str(self.tree.pointer))
+                if rightside and not leftside:
+                    print("Segment is on the right------------> " + segment.name)
                     self.tree.addSegmentRight(segment)
-                else:
+                elif leftside and not rightside:
+                    print(segment.name + " <--------------Segment is on the left")
                     self.tree.addSegmentLeft(segment)
-                    print("<----------------On same line... go to the left")
+                elif not rightside and not leftside:
+                    if utils.sameDirection(mainSegment, segment):
+                        print("On same line... go to the right------------------> " + segment.name)
+                        self.tree.addSegmentRight(segment)
+                    else:
+                        self.tree.addSegmentLeft(segment)
+                        print(segment.name + " <----------------On same line... go to the left")
+            print("")
+            print("")
             #else:
             #    print("well then what the fuck happened?")
         #print("---------------------------------------")
         #print("")
+        print("CHECK LEFT SECTOR")
         self.sectorCheck(self.tree.pointer.left)
+        print("")
+        print("CHECK RIGHT SECTOR")
         self.sectorCheck(self.tree.pointer.right)
         #self.traverseTree()
     

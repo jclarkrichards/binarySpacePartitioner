@@ -3,6 +3,7 @@ from Primitives.vectors import Vector2
 
 def clamp(value, precision):
     '''Clamp a value'''
+    #val = round(value, precision)
     val = round(value, precision)
     #val = round(value)
     if val == 0.0:
@@ -17,35 +18,69 @@ def clampVector(vector, precision):
 
 def vectorOnRight(segment, other):
     '''Check if the other vector is to the right of vector.  Return True'''
+    print("RIGHT? " + str(segment) + " and " + str(other))
+    #print(str(segment.direction) + " and " + str(other.direction))
+    test1 = segment.direction == other.direction
+    test2 = segment.direction == (other.direction*-1)
+    #print(str(test1) + ", " + str(test2))
+    #if not test1 and not test2:
     v1 = other.p1 - segment.p1
     v2 = other.p2 - segment.p1
+    v1norm = v1.normalize()
+    v2norm = v2.normalize()
+    v1norm = clampVector(v1norm, 2)
+    v2norm = clampVector(v2norm, 2)
+    #print(str(v1norm) + " :: " + str(v2norm))
+    if v1norm == v2norm == segment.direction:
+        return False
+    elif v1norm == v2norm == (segment.direction*-1):
+        return False
     val1 = segment.vector.cross(v1)
     val2 = segment.vector.cross(v2)
-    val1 = clamp(val1, 5)
-    val2 = clamp(val2, 5)
-    #print(val1, val2)
+    val1 = clamp(val1, 0)
+    val2 = clamp(val2, 0)
+    #print("NOT ON LINE")
+    print(val1, val2)
     if val1 > 0 or val2 > 0:
         return True
     return False
+    
 
 def vectorOnLeft(segment, other):
     '''Check if the other vector is to the left of vector.  Return True'''
+    print("LEFT? " + str(segment) + " and " + str(other))
+    #print(str(segment.direction) + " and " + str(other.direction))
+    test1 = segment.direction == other.direction
+    test2 = segment.direction == (other.direction*-1)
+    #print(str(test1) + ", " + str(test2))
+    #if not test1 and not test2:
     v1 = other.p1 - segment.p1
     v2 = other.p2 - segment.p1
+    v1norm = v1.normalize()
+    v2norm = v2.normalize()
+    v1norm = clampVector(v1norm, 2)
+    v2norm = clampVector(v2norm, 2)
+    if v1norm == v2norm == segment.direction:
+        return False
+    elif v1norm == v2norm == (segment.direction*-1):
+        return False
+    #print(str(v1norm) + " :: " + str(v2norm))
     val1 = segment.vector.cross(v1)
     val2 = segment.vector.cross(v2)
-    val1 = clamp(val1, 5)
-    val2 = clamp(val2, 5)
-    #print(val1, val2)
+    val1 = clamp(val1, 0)
+    val2 = clamp(val2, 0)
+    #print("NOT ON LINE")
+    print(val1, val2)
     if val1 < 0 or val2 < 0:
         return True
     return False
 
 def sameDirection(segment, other):
     '''Check to see if the other segment points in the same direction as segment'''
-    angle = segment.vector.angle(other.vector)
-    angle = clamp(angle, 5)
-    if angle == 0:
+    if segment.direction == other.direction:
+    #angle = segment.vector.angle(other.vector)
+    #angle = clamp(angle, 5)
+    #if angle == 0:
         return True
     return False
 
@@ -93,6 +128,10 @@ def intersect(p1, p2, v1, v2):
         s = clamp(s, 2)
         t = clamp(t, 2)
     return s, t
+
+def intersectSegments(segment1, segment2):
+    '''Same as above, but this time we can just include the segments instead of positions and directions'''
+    pass
 
 def evenValue(value):
     '''Return True if the value is even, False if odd'''

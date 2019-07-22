@@ -20,6 +20,8 @@ class Segment(object):
         #self.vertex2 = vertex2
         #self.vector = self.vertex2.position - self.vertex1.position
         self.vector = self.p2 - self.p1
+        self.direction = self.vector.normalize()
+        self.direction = utils.clampVector(self.direction, 2)
         self.virtual = virtual
         
     def __str__(self):
@@ -39,15 +41,30 @@ class Segment(object):
         '''Return a Ray representation of this Segment'''
         return Ray(self.p1, self.vector)
     
-    def intersectSegment(self, other):
+    def intersectSegment(self, other, includeEndpoints=False):
         '''Segment-Segment intersection.  Segments physically intersect each other'''
-        #print("Does this even happen?")
         s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
-        print(self.name + " intersects " + other.name + " using (s, t) -> ("+str(s)+", "+str(t)+")")
-        if 0 < s < 1 and 0 < t < 1:
-            return True
+        #print(self.name + " intersects " + other.name + " using (s, t) -> ("+str(s)+", "+str(t)+")")
+        if includeEndpoints:
+            if 0 < s < 1 and 0 <= t <= 1:
+                return True
+        else:
+            if 0 < s < 1 and 0 < t < 1:
+                return True
         return False
 
+    def getOtherIntersectionValue(self, other, includeEndpoints=False):
+        '''Get the value of intersection for the other segment where this segment has its endpoint on the other segment'''
+        s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
+        #print(self.name + " intersects " + other.name + " using (s, t) -> ("+str(s)+", "+str(t)+")")
+        if includeEndpoints:
+            if (s == 0 or s == 1) and 0 <= t <= 1:
+                return t
+        else:
+            if (s == 0 or s == 1) and 0 < t < 1:
+                return t
+        return None
+        
     def intersectSegmentEndpoints(self, other):
         '''In a special case we want to know when this segment is intersecting the other segment only at this segments endpoints'''
         #print("Checking endpoint intersections")
@@ -67,28 +84,31 @@ class Segment(object):
         '''Return the midpoint of this sector.  The midpoint is a Vector2'''
         return (self.p1 + self.p2) / 2.0
 
-    def intersectAsRay(self, other):
-        '''Turn this segment into a ray and see if it instersects other Segment objects'''
-        ray = self.getRay()
-        s = ray.intersectSegment(other)
-        if s is not None:
-            splitPosition = ray.position + ray.direction*s
-            #vertex = Vertex(splitPosition)
-            #return splitPosition
-            if s > 0:
-                return Segment(self.p2, splitPosition, True, self.name+"_#")
-            elif s < 0:
-                return Segment(splitPosition, self.p1, True, self.name+"_#")
-        else:
-            return None
+    def otherSegmentConnected(self, other):
+        '''Need to know if the other segment is connected to this segment.  If we test intersection including endpoints, then the other
+        segment is connected if the intersection is at this segements endpoints where s = 0 or s = 1'''
+        s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
+        #print("connection check: " + str(s) + ", " + str(t))
+        if (s == 0 or s == 1) and (t == 0 or t == 1):
+            return True
+        return False
         
-            #if reverse:
-            #    pos = self.vertex2.position
-            #else:
-            #    pos = self.vertex1.position
-            #splitPosition = pos + ray.direction*s
-            #return pos, splitPosition
-
+    def intersectAsRay(self, other, includeEndpoints=False):
+        '''Turn this segment into a ray and see if it instersects other Segment objects'''
+        connectedSegment = self.otherSegmentConnected(other)
+        if not connectedSegment:
+            ray = self.getRay()
+            s = ray.intersectSegment(other, includeEndpoints)
+            if s is not None:
+                splitPosition = ray.position + ray.direction*s
+                splitPosition = utils.clampVector(splitPosition, 2)
+                if s > 0:
+                    return Segment(self.p2, splitPosition, True, self.name+"_#")
+                elif s < 0:
+                    return Segment(splitPosition, self.p1, True, self.name+"_#")
+            else:
+                return None
+        
     def split(self, other):
         '''Split this segment into 2 segments.  We really just create 1 new Segment and then modify this segment.'''
         s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
@@ -101,6 +121,7 @@ class Segment(object):
             segment2 = Segment(other.p2, self.p2, self.virtual, self.name+"_2")
             self.p2 = other.p2
             #segment1 = Segment(self.p1, other.p2, self.virtual)
+
             
 
         return segment2

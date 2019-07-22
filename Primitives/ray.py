@@ -20,11 +20,17 @@ class Ray(object):
         other = segment.getRay()
         return self.parallel(other)
 
-    def intersectSegment(self, segment):
+    def intersectSegment(self, segment, includeEndpoints=False):
         '''Returns the s value indicating where the intersection is occuring on the segment.  If no intersection, then None is returned. If s is negative, then the intersection is happening behind it.'''
         s, t = utils.intersect(self.position, segment.p1, self.direction, segment.vector)
-        if 0 < t < 1:
-            return s
+        if includeEndpoints:
+            #print("s, t = " + str(s) + ", " + str(t))
+            if 0 <= t <= 1:
+                if s != 0 and s != 1: #still need to ignore endpoints where this segment is connected to 
+                    return s
+        else:
+            if 0 < t < 1:
+                return s
         return None
 
     def intersectSegmentRaw(self, segment):
