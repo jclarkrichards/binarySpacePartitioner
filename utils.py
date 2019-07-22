@@ -3,7 +3,7 @@ from Primitives.vectors import Vector2
 
 def clamp(value, precision):
     '''Clamp a value'''
-    val = round(value, 3)
+    val = round(value, precision)
     #val = round(value)
     if val == 0.0:
         val = abs(val)
@@ -90,8 +90,8 @@ def intersect(p1, p2, v1, v2):
         p = p2 - p1
         s = p.cross(v2) / denom
         t = p.cross(v1) / denom
-        s = clamp(s, 5)
-        t = clamp(t, 5)
+        s = clamp(s, 2)
+        t = clamp(t, 2)
     return s, t
 
 def evenValue(value):

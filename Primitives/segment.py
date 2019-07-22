@@ -52,9 +52,7 @@ class Segment(object):
         '''In a special case we want to know when this segment is intersecting the other segment only at this segments endpoints'''
         #print("Checking endpoint intersections")
         #print(self.name + " ..... " + other.name)
-        s, t = utils.intersect(self.p1, other.p1,
-                               self.vector, other.vector)
-        #print(s, t)
+        s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
         if (s == 0 or s == 1) and 0 < t < 1:
             return t
         return None
@@ -78,9 +76,9 @@ class Segment(object):
             #vertex = Vertex(splitPosition)
             #return splitPosition
             if s > 0:
-                return Segment(self.p2, splitPosition, True)
+                return Segment(self.p2, splitPosition, True, self.name+"_#")
             elif s < 0:
-                return Segment(self.p1, splitPosition, True)
+                return Segment(splitPosition, self.p1, True, self.name+"_#")
         else:
             return None
         
@@ -92,17 +90,24 @@ class Segment(object):
             #return pos, splitPosition
 
     def split(self, other):
-        '''Split this segment into 2 segments and return those segments.  We already know where the intersection occurs, we just need to know if others vertex1 or vertex2 makes the intersection.'''
-        s, t = utils.intersect(self.p1, other.p1,
-                               self.vector, other.vector)
-        if t == 0:
-            segment1 = Segment(self.p1, other.p1, self.virtual)
-            segment2 = Segment(other.p1, self.p2, self.virtual)
-        elif t == 1:
-            segment1 = Segment(self.p1, other.p2, self.virtual)
-            segment2 = Segment(other.p2, self.p2, self.virtual)
+        '''Split this segment into 2 segments.  We really just create 1 new Segment and then modify this segment.'''
+        s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
+        if t == 0: #other.p1 intersects this segment
+            segment2 = Segment(other.p1, self.p2, self.virtual, self.name+"_2")
+            self.p2 = other.p1
+            #segment1 = Segment(self.p1, other.p1, self.virtual)
+            
+        elif t == 1: #other.p2 intersects this segment
+            segment2 = Segment(other.p2, self.p2, self.virtual, self.name+"_2")
+            self.p2 = other.p2
+            #segment1 = Segment(self.p1, other.p2, self.virtual)
+            
 
-        return segment1, segment2
+        return segment2
+
+    def reverse(self):
+        '''Return a new segment that is just the reverse of this segment'''
+        return Segment(self.p2, self.p1, self.virtual, self.name+"_r")
      
     def render(self, screen):
         x, y = self.p2.toTuple()

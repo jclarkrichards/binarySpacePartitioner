@@ -124,7 +124,7 @@ class GameController(object):
 
         self.bsp = BSP(self.segments)
         self.bsp.createTree()
-
+        
 
 
     def stepThroughTree(self):

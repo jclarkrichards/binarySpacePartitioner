@@ -77,6 +77,8 @@ class Sector(object):
         bestNewSegments = []
         segmentsToSplit = [] #These are the segments that would need to be split in half
         for segment in self.segments:
+            print("")
+            print("")
             print("SEGMENT " + segment.name+"   +++++++++++++++++++++++++++++")
             tempSegments = []
             tempNewSegments = []
@@ -100,10 +102,10 @@ class Sector(object):
                             #We want to be completely inside the sector
                             if self.pointInsideSector(newsegment.midpoint()):
                                 print("New segement is inside sector.....Add it to the list")
-                                tempSegments.append(segment)
-                                tempNewSegments.append(newsegment)
-                                others.append(other)
-                                #temp.append(newsegment.vertex2.position)
+                                tempSegments.append(segment) #segment I am testing
+                                tempNewSegments.append(newsegment)  #extension from segment to other
+                                others.append(other) #segment that the newsegment crosses
+                                
             #print(str(segment) + " intersect with " + str(len(temp)) + " segments.")
             #We only want segments that intersect 1 other segment
             print(segment.name + "   ---------------TEMP NEW SEGMENTS-------------------  " + str(len(tempNewSegments)))
@@ -122,9 +124,10 @@ class Sector(object):
         print("")
         print("Refining choices.............")
         for i in range(len(bestNewSegments)):
-            value = bestNewSegments[i].intersectSegmentEndpoints(segmentsToSplit[i])
-            if value is not None:
-                values.append(abs(value - 0.5))
+            t = bestNewSegments[i].intersectSegmentEndpoints(segmentsToSplit[i])
+            if t is not None:
+                #print(str(t) + " ,,,,,,,,,")
+                values.append(utils.clamp(abs(t - 0.5), 2))
 
         print("Values = " + str(values))
         if len(values) > 0:
@@ -132,12 +135,14 @@ class Sector(object):
 
             bestNewSegment = bestNewSegments[bestIndex]
             print("best new segment = " + str(bestNewSegment))
-            segment1, segment2 = segmentsToSplit[bestIndex].split(bestNewSegment)
+            segment2 = segmentsToSplit[bestIndex].split(bestNewSegment)
             self.segments.append(bestNewSegment)
-            self.segments.append(Segment(bestNewSegment.p2, bestNewSegment.p1, True))
-            self.segments.append(segment1)
+            self.segments.append(bestNewSegment.reverse())
+            #self.segments.append(Segment(bestNewSegment.p2, bestNewSegment.p1, True))
+            #self.segments.append(segment1)
             self.segments.append(segment2)
-            self.segments.remove(segmentsToSplit[bestIndex])
+            #self.segments.remove(segmentsToSplit[bestIndex])
+            
             return bestSegments[bestIndex]
         #return bestSegments[bestIndex], bestNewSegments[bestIndex], segmentsToSplit[bestIndex]
         #return [bestNewSegments[bestIndex]]
@@ -147,23 +152,31 @@ class Sector(object):
 
     def pointInsideSector(self, point):
         '''point is a Vector2.  Check if a point is inside the sector or outside the sector.  Create a ray that points to the right.  Loop through each segment that makes up this sector and count how many sectors this ray crosses.  If that number is odd, the point is inside the sector.  If even, the point is outside.'''
+        print("IS THIS POINT INSIDE THE SECTOR???")
+        print("------------------- " + str(point) + " -------------------------")
         xvector = Vector2(1,0)
         ray = Ray(point, xvector)
         num_crossings = 0
-        #segments = self.segments + self.segments[0:1]
+        print("Num segments to check: " + str(len(self.segments)))
         for segment in self.segments:
-            s = ray.intersectSegment(segment)
-            if s is not None:
-                if s > 0:
+            print("Checking segment " + segment.name)
+            t = ray.intersectSegmentRaw(segment)
+            print("t = " + str(t))
+            if t is not None:
+                if 0 < t < 1:
+                    print("Crossing a line normally")
                     num_crossings += 1
-                
-            #k1 = segments[i]
-            #k2 = segments[i+1]
-            #p1 = self.vertices[k1].position
-            #p2 = self.vertices[k2].position
-            #segment = Segment(self.vertices[k1], self.vertices[k2])
-            #if ray.intersectSegment(segment):
-            #    num_crossings += 1
+                elif t == 0: #we are crossing the segments p1 vector.  check if p2 is above us
+                    print("CROSSING " + segment.name + " p1")
+                    if segment.p2.y < segment.p1.y:
+                        print(segment.name + " p2 is above p1")
+                        num_crossings += 1
+                elif t == 1: #we are crossing the segments p2 vector.  check if p1 is above us
+                    print("CROSSING " + segment.name + " p2")
+                    if segment.p1.y < segment.p2.y:
+                        print(segment.name + " p1 is above p2")
+                        num_crossings += 1
+
         print("For point " + str(point) + " # of crossings = " + str(num_crossings))
         if utils.evenValue(num_crossings):
             print("NOT INSIDE SECTOR")

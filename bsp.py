@@ -115,10 +115,18 @@ class BinarySpacePartitioner(object):
         sector = Sector(segments)
         bestSegment = sector.electBestSegment()
         print("Best segment is " + str(bestSegment))
+        self.segments = sector.segments
+        print("Segments as they are now:::")
+        for seg in self.segments:
+            print(seg)
+        print("................,,,,,.....,,,,,,.................")
+        print("")
+   
+        self.segmentList += self.segments #Only for display purposes so I can see all the segments even if duplicates.
+
+        """Next we need to check to see if these segments get divided up corretly into the tree."""
 
 
-        #self.segments = sector.segments
-        #self.segmentList += self.segments #Only for display purposes so I can see all the segments even if there are duplicates.
         #self.tree.pointer.data = [bestSegment]
         #self.divideSegments(bestSegment, self.segments)
 

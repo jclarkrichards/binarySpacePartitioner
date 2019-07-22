@@ -27,6 +27,13 @@ class Ray(object):
             return s
         return None
 
+    def intersectSegmentRaw(self, segment):
+        '''Same as above, but instead we are only looking ahead of ray not behind and we want full range of t: 0<=t<=1'''
+        s, t = utils.intersect(self.position, segment.p1, self.direction, segment.vector)
+        if s > 0:
+            return t
+        return None
+
     
 
     
