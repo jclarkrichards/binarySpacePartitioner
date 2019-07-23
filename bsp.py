@@ -160,7 +160,11 @@ class BinarySpacePartitioner(object):
         segments = self.tree.pointer.data
         print("Number of segments : " + str(len(segments)))
         sector = Sector(segments)
-        bestSegment = sector.electBestSegment()
+
+
+        #bestSegment = sector.electBestSegment()
+        bestSegment = sector.getBestSegment()
+
         print("Best segment is " + str(bestSegment))
         self.segments = sector.segments
         print("Segments as they are now:::")
@@ -175,7 +179,7 @@ class BinarySpacePartitioner(object):
 
 
         #self.tree.pointer.data = [bestSegment]
-        self.divideSegments(bestSegment, self.segments)
+        #self.divideSegments(bestSegment, self.segments)
 
 
 

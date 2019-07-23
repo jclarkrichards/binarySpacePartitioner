@@ -113,7 +113,7 @@ class GameController(object):
 
     def getTestSector(self):
         '''From the testsectors file.  Press button 5'''
-        L = testsectors.sector1()
+        L = testsectors.sector2()
         print(L)
         self.segments = []
         for pair in L:     

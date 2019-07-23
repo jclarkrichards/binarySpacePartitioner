@@ -85,8 +85,7 @@ class Segment(object):
         return (self.p1 + self.p2) / 2.0
 
     def otherSegmentConnected(self, other):
-        '''Need to know if the other segment is connected to this segment.  If we test intersection including endpoints, then the other
-        segment is connected if the intersection is at this segements endpoints where s = 0 or s = 1'''
+        '''Need to know if the other segment is connected to this segment.  If we test intersection including endpoints, then the other segment is connected if the intersection is at this segements endpoints where s = 0 or s = 1'''
         s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)
         #print("connection check: " + str(s) + ", " + str(t))
         if (s == 0 or s == 1) and (t == 0 or t == 1):
@@ -101,7 +100,7 @@ class Segment(object):
             s = ray.intersectSegment(other, includeEndpoints)
             if s is not None:
                 splitPosition = ray.position + ray.direction*s
-                splitPosition = utils.clampVector(splitPosition, 2)
+                splitPosition = utils.clampVector(splitPosition, 0)
                 if s > 0:
                     return Segment(self.p2, splitPosition, True, self.name+"_#")
                 elif s < 0:

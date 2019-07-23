@@ -69,6 +69,31 @@ class Sector(object):
         #print("=========CONCAVITY CHECKING END========")
         return isconvex
 
+    def getBestSegment(self):
+        #Matrices (Dictionaries) for when key intersects with the inner dictionary segments
+        sMatrix = {}  #Value for key segment to intersect the other segments
+        tMatrix = {}  #Value for the other segments when key segment intersects 
+        for segment in self.segments:
+            sMatrix[segment.name] = {}
+            tMatrix[segment.name] = {}
+            for other in self.segments:
+                if other is not segment:
+                    s, t = utils.intersect(segment.p1, other.p1, segment.vector, other.vector)
+                    sMatrix[segment.name][other.name] = s;
+                    tMatrix[segment.name][other.name] = t;
+
+        print("S Matrix")
+        for key in sMatrix.keys():
+            for otherkey in sMatrix[key].keys():
+                print(key + " intersects " + otherkey + " at " + str(sMatrix[key][otherkey]))
+
+        print("T Matrix")
+        for key in tMatrix.keys():
+            for otherkey in tMatrix[key].keys():
+                print(key + " intersects " + otherkey + " at " + str(tMatrix[key][otherkey]))
+
+
+    
     #Might want to try and split this method so that it is not so big and complex
     def electBestSegment(self):
         '''The best segment is the segment that can divide this sector into 2 sectors as equally as possible'''
@@ -81,15 +106,19 @@ class Sector(object):
         for segment in self.segments:
             print("")
             print("")
+            print("")
             print("SEGMENT " + segment.name+"   +++++++++++++++++++++++++++++")
             tempSegments = []
-            tempNewSegments = []
-            
+            tempNewSegments = []         
             others = []
             for other in self.segments:                
                 if other is not segment:
                     print(segment.name + " against------OTHER SEGMENT " + other.name)
+                    s, t = utils.intersect(segment.p1, other.p1, segment.vector, other.vector)
+
                     newsegment = segment.intersectAsRay(other, includeEndpoints=True)
+
+
                     if newsegment is not None: #segment ray intersects other
                         if newsegment not in tempNewSegments: 
                             print("+++++++++++NEW SEGMENT = " + str(newsegment))
