@@ -24,6 +24,7 @@ class Segment(object):
         self.direction = utils.clampVector(self.direction, 2)
         self.virtual = virtual
         
+        
     def __str__(self):
         '''Return a string representation of a Segment'''
         return self.name + " : " + str(self.p1) + " ---> " + str(self.p2)
