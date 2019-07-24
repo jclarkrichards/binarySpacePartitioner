@@ -137,4 +137,37 @@ def evenValue(value):
     '''Return True if the value is even, False if odd'''
     return not value % 2
 
+def allPositive(L):
+    '''From the list return if all of the values are positive'''
+    positive = True
+    for item in L:
+        if item < 0:
+            return False
+    return True
 
+def allNegative(L):
+    '''From the list return True if all the items are negative'''
+    negative = True
+    for item in L:
+        if item >=0:
+            return False
+    return True
+
+def minmaxValues(D, key, M):
+    '''Given a list of values, return a new list that includes the minimum positive value and the maximum negative value, M is the matrix of values that we need since L does not contain these values, just the names of the segments.'''
+    positive = []
+    negative = []
+    minval = []
+    maxval = []
+    for item in D[key]:
+        if M[item][key] >= 0: positive.append(item)
+        else: negative.append(item)
+    if len(positive) > 0:
+        positiveValues = [M[item][key] for item in positive]
+        index = positiveValues.index(min(positiveValues))
+        minval = [positive[index]]
+    if len(negative) > 0:
+        negativeValues = [M[item][key] for item in negative]
+        index = negativeValues.index(max(negativeValues))
+        maxval = [negative[index]]
+    return minval + maxval
