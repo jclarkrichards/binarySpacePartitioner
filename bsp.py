@@ -19,7 +19,7 @@ class BinarySpacePartitioner(object):
         self.tree.pointer.data = self.segments
         #for segment in self.segments:
         #    self.tree.addSegment(segment)
-        self.sectorCheck(self.tree.pointer)
+        #self.sectorCheck(self.tree.pointer)
         #self.traverseTree()
         
     def traverseTree(self):
@@ -135,7 +135,7 @@ class BinarySpacePartitioner(object):
 		self.traverseToParent()
             else:
                 print("Finished... All are convex")            
-    
+    """
     def sectorCheck(self, treenode):
         '''Pointing at some data, check if data represents a convex or concave sector'''
         print("CHECKING THE SECTOR FOR CONCAVITY")
@@ -153,7 +153,7 @@ class BinarySpacePartitioner(object):
         self.sector = Sector(segments)
         isconvex = self.sector.convexOrConcave()
         return isconvex
-
+    """
     def getBestSegment(self):
         '''elect a segment from the segmentList to remain on the node.  Then move the other segments down to the child nodes depending on left or right status.'''
         print("++++++++++++++++++++Getting the best segment++++++++++++++")
@@ -163,9 +163,12 @@ class BinarySpacePartitioner(object):
 
 
         #bestSegment = sector.electBestSegment()
-        bestSegment = sector.getBestSegment()
+        #bestSegment = sector.getBestSegment()
+        sector.splitSegments()
+        #print("Best segment is " + bestSegment)
 
-        print("Best segment is " + str(bestSegment))
+        #sector.splitSegments(bestSegment)
+        
         self.segments = sector.segments
         print("Segments as they are now:::")
         for seg in self.segments:

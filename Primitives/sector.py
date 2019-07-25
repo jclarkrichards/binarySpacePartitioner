@@ -1,10 +1,10 @@
 import pygame
 from constants import *
-from Primitives.vectors import Vector2
+#from Primitives.vectors import Vector2
 from Primitives.segment import Segment
-from Primitives.ray import Ray
-from Primitives.vertex import Vertex
-from copy import deepcopy
+#from Primitives.ray import Ray
+#from Primitives.vertex import Vertex
+#from copy import deepcopy
 import utils
 """A sector is an area that is defined by a list of Segment objects.  We can check to see if this sector is convex or concave"""
 
@@ -13,14 +13,14 @@ class Sector(object):
     def __init__(self, segments):
         print("----SectorBSP-----")
         self.segments = segments
-        for seg in self.segments:
-            print(seg)
-        print("")
-        print("")
-        print("_______________Segments in this Sector______________")
-        self.segments = self.sortSegments()
-        for seg in self.segments:
-            print(seg)
+        #for seg in self.segments:
+        #    print(seg)
+        #print("")
+        #print("")
+        #print("_______________Segments in this Sector______________")
+        #self.segments = self.sortSegments()
+        #for seg in self.segments:
+        #    print(seg)
         self.sMatrix = {}
 
     def getSegmentFromName(self, name):
@@ -29,7 +29,7 @@ class Sector(object):
             if segment.name == name:
                 return segment
         return None
-
+    """
     def sortSegments(self):
         '''It is not guaranteed that the segments will be in any particular order.  By restrictions, the segments should form 1 closed loop.  
         This does not happen unless we know ahead of time that we have a single closed loop.'''
@@ -76,14 +76,14 @@ class Sector(object):
         #else: print("CONCAVE")
         #print("=========CONCAVITY CHECKING END========")
         return isconvex
-
+    
     def getValuesFromNameList(self, key, D):
         '''Given a list of segment names, return the list of values form the sMatrix'''
         valuelist = []
         for value in D[key]:
             valuelist.append(self.sMatrix[value][key])
         return valuelist
-            
+    """
     def getIntersectionMatrix(self):
         '''Get the sMatrix which shows how all of the segments intersect each other'''
         sMatrix = {}  #Value for key segment to intersect the other segments
@@ -102,7 +102,7 @@ class Sector(object):
             d[key] = []
             for otherkey in self.sMatrix[key].keys():
                 value = self.sMatrix[key][otherkey]
-                if 0 <= value <= 1: #between 0 and 1 (inclusive)
+                if 0 < value < 1: #between 0 and 1 (inclusive)
                     if value == 0:
                         if self.sMatrix[otherkey][key] != 1:
                             d[key].append(otherkey)
@@ -113,9 +113,9 @@ class Sector(object):
                         d[key].append(otherkey)
                         
         #remove empty entries
-        for key in d.keys():
-            if len(d[key]) == 0:
-                d.pop(key)
+        #for key in d.keys():
+        #    if len(d[key]) == 0:
+        #        d.pop(key)
         return d
     """
     def resolveMultipleCrossings(self, D):
@@ -134,7 +134,8 @@ class Sector(object):
                     print("All are negative")
                 else:
                     print("Some are positive and some are negative")
-    """
+    
+    
     def removeBlockedSegments(self, D):
         '''Given the dictionary created from the firstpass, find entries with multiple crossings.'''
         Dnew = {}
@@ -142,7 +143,7 @@ class Sector(object):
             result = utils.minmaxValues(D, key, self.sMatrix)
             Dnew[key] = result
         return Dnew
-
+    
     def removeOutsideSegments(self, D):
         '''Given the dictionary created from firstpass, find the entries that have segments on the outside of the sector'''
         Dnew = {}
@@ -166,34 +167,128 @@ class Sector(object):
                             Dnew[key] = [item]
 
         return Dnew
-
+    
     def removeMultipleCrossings(self, D):
         Dnew = {}
         for key in D.keys():
             if len(D[key]) == 1:
                 Dnew[key] = D[key]
         return Dnew
+    """
+    def getDivisionMatrix(self, D):
+        '''Given a dictionary found after calling getSegmentCrossingLists.  Find how many segments are to the left and right of each key'''
+        DM = {}
+        for key in D.keys():
+            DM[key] = {"left":0, "right":0}
+            for item in D[key]: #We already know key intersects these segments, so add to both left and right
+                DM[key]["left"] += 1
+                DM[key]["right"] += 1
+            for item in self.sMatrix.keys():
+                if item is not key and item not in D[key]: #For all of the other segments though, they should be entirely to left or right
+                    segment = self.getSegmentFromName(key)
+                    testSegment = self.getSegmentFromName(item)
+                    leftOrRight = self.getSegmentSide(segment, testSegment)
+                    #print(key +" and " + item + " : " + leftOrRight)
+                    DM[key][leftOrRight] += 1
+                
+        return DM
+
+    def getSegmentSide(self, segment, testSegment):
+        '''Which side of segment does testSegment lie on?  left or right?  If testSegment is on same line as segment, then it is on the right.'''
+        print(segment.name + " || " + testSegment.name)
+        #if (segment.direction == testSegment.direction) or (segment.direction == (testSegment.direction * -1)):
+        #    return "right"
+        v1 = testSegment.p1 - segment.p1
+        v2 = testSegment.p2 - segment.p1
+        #print("s.p1 ="+ str(segment.p1) + " s.p2 = " + str(segment.p2))
+        #print("t.p1 ="+ str(testSegment.p1) + "t.p2 = " + str(testSegment.p2))
+        #print(segment.vector)
+        
+        #print(str(v1)+" and " + str(v2))
+        #print("segment x v1 and segment x v2")
+        #print(str(segment.vector.cross(v1)) + " and " + str(segment.vector.cross(v2)))
+        #print("")
+        value1 = segment.vector.cross(v1)
+        value2 = segment.vector.cross(v2)
+        if (value1 > 0 and value2 < 0) or (value1 < 0 and value2 > 0):
+            vals = [abs(value1), abs(value2)]
+            index = vals.index(max(vals))
+            if index == 0:
+                value = value1
+            else:
+                value = value2
+        else:
+            if value1 >= 0 and value2 >= 0:
+                value = max([value1, value2])
+            else:
+                value = min([value1, value2])
+                
+        print("value = " + str(value))
+        print("")
+        if value >= 0:
+        #if segment.vector.cross(v1) >=0 and segment.vector.cross(v2) >= 0:
+            return "right"
+        return "left"
+        
+    def getMostEvenSplit(self, DM):
+        '''The division matrix has left and right.  We subtract the 2 and return the segment with the lowest value'''
+        D = {}
+        for key in DM.keys():
+            D[key] = abs(DM[key]["left"] - DM[key]["right"])
+        minval = min(D.values())
+        for key in D.keys():
+            if D[key] == minval:
+                return key
+        return None
     
-    def getBestSegment(self):
+    def splitSegments(self):
         #Matrices (Dictionaries) for when key intersects with the inner dictionary segments
         print("GETTING THE BEST SEGMENT")
         self.sMatrix = self.getIntersectionMatrix()
-        firstpass = self.getSegmentCrossingLists()
+        results = self.getSegmentCrossingLists()
         print("FIRST PASS")
-        print(firstpass)
-        results = self.removeMultipleCrossings(firstpass)
-        print("Multiple crossings removed")
         print(results)
+        #For each segment, how many segments are to the right and left of this segment?
+        divisionMatrix = self.getDivisionMatrix(results)
+        print("------------DIVISION MATRIX # SEGEMENTS ON EACH SIDE OF SEGMENT-----------")
+        print(divisionMatrix)
+        #Using the divisionMatrix, the best segment is the one that divides the sector most evenly.  
+        bestName = self.getMostEvenSplit(divisionMatrix)
+        print("Best segment to use for the split is ............. " + bestName)
+        #return bestName
+        #We now have the bestest segment to use to split this sector in two or more
+        #Use this sector, the divisionMatrix, and the values in the sMatrix to split the segments that it intersects into 2 segments
+        #self.splitSegments(bestName, divisionMatrix[bestName])
+        for item in results[bestName]:
+            mult = self.sMatrix[bestName][item]
+            print("split " + item + " at " + str(mult))
+            segment = self.getSegmentFromName(item)
+            point = segment.p1 + segment.vector * mult
+            newSegment1 = Segment(segment.p1, point, name=segment.name)
+            newSegment2 = Segment(point, segment.p2, name=segment.name+"#")
+            self.segments.remove(segment)
+            self.segments.append(newSegment1)
+            self.segments.append(newSegment2)
+            print("SANITY CHECK")
+            mainSegment = self.getSegmentFromName(bestName)
+            print(self.getSegmentSide(mainSegment, newSegment1))
+            print(self.getSegmentSide(mainSegment, newSegment2))
+            print("")
+
+        print("____________-------------_________________----------")
+        #results = self.removeMultipleCrossings(firstpass)
+        #print("Multiple crossings removed")
+        #print(results)
         #filteredResults = self.removeBlockedSegments(firstpass)
         #Use the firstpass dictionary to find and remove any outside crossings
         #print("Filtered Results")
         #print(filteredResults)
-        print("")
-        print("")
-        print("Removed outside segments")
-        filteredResults = self.removeOutsideSegments(results)
+        #print("")
+        #print("")
+        #print("Removed outside segments")
+        #filteredResults = self.removeOutsideSegments(results)
         
-        print(filteredResults)
+        #print(filteredResults)
 
         #print("Final Results")
         #print(finalresults)
@@ -206,9 +301,6 @@ class Sector(object):
         #    for otherkey in self.sMatrix[key].keys():
         #        print(key + " intersects " + otherkey + " at " + str(self.sMatrix[key][otherkey]))
         #    print("")
-
-
-
 
             
     #Might want to try and split this method so that it is not so big and complex
@@ -304,6 +396,7 @@ class Sector(object):
 
     
     """
+    """
     def pointInsideSector(self, point):
         '''point is a Vector2.  Check if a point is inside the sector or outside the sector.  Create a ray that points to the right.  Loop through each segment that makes up this sector and count how many sectors this ray crosses.  If that number is odd, the point is inside the sector.  If even, the point is outside.'''
         #print("IS THIS POINT INSIDE THE SECTOR???")
@@ -337,7 +430,7 @@ class Sector(object):
             return False
         #print("INSIDE SECTOR")
         return True
-
+    """
 
             
     
