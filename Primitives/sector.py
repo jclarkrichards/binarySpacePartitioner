@@ -13,6 +13,7 @@ class Sector(object):
     def __init__(self, segments):
         print("----SectorBSP-----")
         self.segments = segments
+        self.bestSegment = None
         #for seg in self.segments:
         #    print(seg)
         #print("")
@@ -195,7 +196,8 @@ class Sector(object):
 
     def getSegmentSide(self, segment, testSegment):
         '''Which side of segment does testSegment lie on?  left or right?  If testSegment is on same line as segment, then it is on the right.'''
-        print(segment.name + " || " + testSegment.name)
+    
+        #print(segment.name + " || " + testSegment.name)
         #if (segment.direction == testSegment.direction) or (segment.direction == (testSegment.direction * -1)):
         #    return "right"
         v1 = testSegment.p1 - segment.p1
@@ -223,8 +225,8 @@ class Sector(object):
             else:
                 value = min([value1, value2])
                 
-        print("value = " + str(value))
-        print("")
+        #print("value = " + str(value))
+        #print("")
         if value >= 0:
         #if segment.vector.cross(v1) >=0 and segment.vector.cross(v2) >= 0:
             return "right"
@@ -240,10 +242,19 @@ class Sector(object):
             if D[key] == minval:
                 return key
         return None
-    
+
+    def checkSplittableSegmentExists(self, DM):
+        '''Use the division matrix to check if there is at least 1 splittable segment'''
+        for key in DM.keys():
+            if DM[key]["left"] > 0 and DM[key]["right"] > 0:
+                return True
+        print("NO SPLITTABLE SEGMENTS")
+        return False
+                
     def splitSegments(self):
         #Matrices (Dictionaries) for when key intersects with the inner dictionary segments
         print("GETTING THE BEST SEGMENT")
+        print("Number of segments = " + str(len(self.segments)))
         self.sMatrix = self.getIntersectionMatrix()
         results = self.getSegmentCrossingLists()
         print("FIRST PASS")
@@ -252,28 +263,32 @@ class Sector(object):
         divisionMatrix = self.getDivisionMatrix(results)
         print("------------DIVISION MATRIX # SEGEMENTS ON EACH SIDE OF SEGMENT-----------")
         print(divisionMatrix)
-        #Using the divisionMatrix, the best segment is the one that divides the sector most evenly.  
-        bestName = self.getMostEvenSplit(divisionMatrix)
-        print("Best segment to use for the split is ............. " + bestName)
-        #return bestName
-        #We now have the bestest segment to use to split this sector in two or more
-        #Use this sector, the divisionMatrix, and the values in the sMatrix to split the segments that it intersects into 2 segments
-        #self.splitSegments(bestName, divisionMatrix[bestName])
-        for item in results[bestName]:
-            mult = self.sMatrix[bestName][item]
-            print("split " + item + " at " + str(mult))
-            segment = self.getSegmentFromName(item)
-            point = segment.p1 + segment.vector * mult
-            newSegment1 = Segment(segment.p1, point, name=segment.name)
-            newSegment2 = Segment(point, segment.p2, name=segment.name+"#")
-            self.segments.remove(segment)
-            self.segments.append(newSegment1)
-            self.segments.append(newSegment2)
-            print("SANITY CHECK")
-            mainSegment = self.getSegmentFromName(bestName)
-            print(self.getSegmentSide(mainSegment, newSegment1))
-            print(self.getSegmentSide(mainSegment, newSegment2))
-            print("")
+        #Using the divisionMatrix, the best segment is the one that divides the sector most evenly.
+        hasSplittableSegment = self.checkSplittableSegmentExists(divisionMatrix)
+        if hasSplittableSegment:
+            bestName = self.getMostEvenSplit(divisionMatrix)
+            self.bestSegment = self.getSegmentFromName(bestName)
+            print("Best segment to use for the split is ............. " + bestName)
+            #return bestName
+            #We now have the bestest segment to use to split this sector in two or more
+            #Use this sector, the divisionMatrix, and the values in the sMatrix to split the segments that it intersects into 2 segments
+            #self.splitSegments(bestName, divisionMatrix[bestName])
+            for item in results[bestName]:
+                mult = self.sMatrix[bestName][item]
+                print("split " + item + " at " + str(mult))
+                segment = self.getSegmentFromName(item)
+                point = segment.p1 + segment.vector * mult
+                newSegment1 = Segment(segment.p1, point, name=segment.name)
+                newSegment2 = Segment(point, segment.p2, name=segment.name+"#")
+                self.segments.remove(segment)
+                self.segments.append(newSegment1)
+                self.segments.append(newSegment2)
+                print("SANITY CHECK")
+                #mainSegment = self.getSegmentFromName(bestName)
+                print(self.getSegmentSide(self.bestSegment, newSegment1))
+                print(self.getSegmentSide(self.bestSegment, newSegment2))
+                print("")
+        print("soooooo #of segments = " + str(len(self.segments)))
 
         print("____________-------------_________________----------")
         #results = self.removeMultipleCrossings(firstpass)

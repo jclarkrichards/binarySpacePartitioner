@@ -29,14 +29,20 @@ class BinarySpacePartitioner(object):
         print("")
         print("Traverse Tree")
         self.tree.gotoRoot() #start at the root node whenever we traverse the tree
+        #sector = self.getBestSegment()
+        #if sector.bestSegment is not None:
+        #    pass
+        #    #self.divideSegments(sector)
+        #else:
+        #    print("No segments selected for splitting")
         self.findLeaf()
         #if self.tree.pointer is not self.tree.root:
         #    self.sectorCheck()
-
+    """
     def traverseTreeTest(self):
         self.tree.gotoRoot()
         self.findLeafTest()
-
+    """
     def canTraverseLeft(self):
         '''Check if able to move to the left child node'''
         if self.tree.pointer.left is not None:
@@ -68,6 +74,7 @@ class BinarySpacePartitioner(object):
         self.tree.gotoRight()
         self.findLeaf()
 
+    """
     def traverseLeftTest(self):
         '''go to the left node'''
         print("<----LEFT")
@@ -79,7 +86,7 @@ class BinarySpacePartitioner(object):
         print("RIGHT---->")
         self.tree.gotoRight()
         self.findLeafTest()
-
+    """
     def traverseToParent(self):
         '''Go back to the parent'''
         print("^^^PARENT^^^")
@@ -89,20 +96,28 @@ class BinarySpacePartitioner(object):
 
     def findLeaf(self):
         if self.tree.isleaf():
-            if self.tree.pointer.isConvex:
-                self.traverseToParent()
+            #if self.tree.pointer.isConvex:
+            #    self.traverseToParent()
+            #else:
+            print("----------LEAF FOUND---------")
+            for seg in self.tree.pointer.data:
+                print(seg)
+            print("")
+            print("")
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("")
+            print("")
+            sector = self.getBestSegment()
+            print("# segments is " + str(len(sector.segments)))
+            if sector.bestSegment is not None:
+                self.divideSegments(sector)
             else:
-                print("----------CONCAVE LEAF---------")
-                for seg in self.tree.pointer.data:
-                    print(seg)
-                print("")
-                print("")
-                print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-                print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-                print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-                print("")
-                print("")
-                self.getBestSegment()
+                print("No segments selected for splitting")
+                if self.canTraverseToParent():
+                    self.traverseToParent()
+            
         else:
             if self.canTraverseLeft():
                 self.traverseLeft()
@@ -112,13 +127,14 @@ class BinarySpacePartitioner(object):
 		self.traverseToParent()
             else:
                 print("Finished... All are convex")            
-    
+
+    """
     def findLeafTest(self):
         if self.tree.isleaf():
             if self.tree.pointer.isConvex:
                 self.traverseToParent()
             else:
-                print("----------CONCAVE LEAF---------")
+                print("----------LEAF FOUND---------")
                 for seg in self.tree.pointer.data:
                     print(seg)
                 print("")
@@ -135,7 +151,7 @@ class BinarySpacePartitioner(object):
 		self.traverseToParent()
             else:
                 print("Finished... All are convex")            
-    """
+    
     def sectorCheck(self, treenode):
         '''Pointing at some data, check if data represents a convex or concave sector'''
         print("CHECKING THE SECTOR FOR CONCAVITY")
@@ -165,18 +181,20 @@ class BinarySpacePartitioner(object):
         #bestSegment = sector.electBestSegment()
         #bestSegment = sector.getBestSegment()
         sector.splitSegments()
+        print("Immediately after sector.splitSegment... # segments = " + str(len(sector.segments)))
+        #self.segmentList += sector.segments #Only for display purposes, do not need this in actual usage.
+        return sector
         #print("Best segment is " + bestSegment)
 
         #sector.splitSegments(bestSegment)
         
-        self.segments = sector.segments
-        print("Segments as they are now:::")
-        for seg in self.segments:
-            print(seg)
-        print("................,,,,,.....,,,,,,.................")
-        print("")
-   
-        self.segmentList += self.segments #Only for display purposes so I can see all the segments even if duplicates.
+        #self.segments = sector.segments
+        #print("Segments as they are now:::")
+        #for seg in self.segments:
+        #    print(seg)
+        #print("................,,,,,.....,,,,,,.................")
+        #print("")
+        #self.divideSegments(sector)
 
         """Next we need to check to see if these segments get divided up corretly into the tree."""
 
@@ -193,8 +211,47 @@ class BinarySpacePartitioner(object):
         #return testVertexList #just for testing
         #print("Number of Segments = " + str(len(self.segments)))
 
+
+    def divideSegments(self, sector):
+        '''Divide the segments from the sector into left and right children.  At this point we should be on the correct tree node.'''  
+        print("DIVDING THE SEGMENTS")
+        print("Segments currently on this node")
+        print("Number of segments = " + str(len(sector.segments)))
+        print("Number of segments = " + str(len(self.tree.pointer.data)))
+        #for seg in self.tree.pointer.data:
+        #    print(seg)
+
+        print("-------------------------------------------------------")
+        #print("Segments we need to divide into left and right children")
+        #for seg in sector.segments:
+        #    print(seg)
+
+        #print("The splitting segment is " + sector.bestSegment.name)
+        self.tree.setSegment(sector.bestSegment)
         
-    def divideSegments(self, mainSegment, segments):
+        for segment in sector.segments:
+            if sector.bestSegment.name != segment.name:
+                leftOrRight = sector.getSegmentSide(sector.bestSegment, segment)
+                print(sector.bestSegment.name +" ::: " + segment.name + " " + leftOrRight)
+                if leftOrRight is "right":
+                    self.tree.addSegmentRight(segment)
+                elif leftOrRight is "left":
+                    self.tree.addSegmentLeft(segment)
+
+        print("=====================PARENT===========================")
+        #self.tree.gotoParent()
+        self.tree.pointer.printData()
+        self.tree.gotoLeft()
+        print("=====================LEFT===========================")
+        self.tree.pointer.printData()
+        self.tree.gotoParent()
+        self.tree.gotoRight()
+        print("=====================RIGHT===========================")
+        self.tree.pointer.printData()
+
+        
+    """
+    def divideSegments_Old(self, mainSegment, segments):
         '''Divide the segments into the left and right child nodes.  Create the left and right nodes for the node the tree pointer is pointing to and put the segments there depending if they are left or right of the mainSegment.  Then in the end we call the traverseTree in order to start the process over again.'''
         print("DIVIDING THE SEGMENTS")
         print(str(len(segments)) + " to divide up into LEFT and RIGHT")
@@ -242,4 +299,4 @@ class BinarySpacePartitioner(object):
         print("CHECK RIGHT SECTOR")
         self.sectorCheck(self.tree.pointer.right)
         #self.traverseTree()
-    
+    """

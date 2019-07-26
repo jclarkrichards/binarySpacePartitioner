@@ -8,8 +8,12 @@ class TreeNode(object):
         self.left = None
         self.right = None
         self.parent = None
-        self.isConvex = False
+        #self.isConvex = False
         self.visited = False
+
+    def printData(self):
+        for d in self.data:
+            print(d)
 
     
 class BinaryTree(object):
@@ -17,6 +21,10 @@ class BinaryTree(object):
         self.root = TreeNode()
         self.pointer = self.root
 
+    def setSegment(self, segment):
+        '''Whatever is already in the data gets wiped and replaced by this'''
+        self.pointer.data = [segment]
+        
     def addSegment(self, segment):
         '''Add a segment to the node that is being pointed at currently.'''
         self.pointer.data.append(segment)

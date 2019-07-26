@@ -100,3 +100,12 @@ def sector5():
 
     return L
 
+def sector6():
+    L = []
+    L.append(((40,40), (400,40), "a"))
+    L.append(((400,40), (400,240), "b"))
+    L.append(((400,240), (40,240), "c"))
+    L.append(((40,240), (40,40), "d"))
+
+    return L
+

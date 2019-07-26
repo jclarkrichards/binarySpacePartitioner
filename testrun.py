@@ -130,7 +130,7 @@ class GameController(object):
     def stepThroughTree(self):
         '''This just helps me step through the tree one iteration at a time to see what it is doing for debugging.'''
         self.bsp.traverseTree()
-        self.segments = self.bsp.segmentList
+        #self.segments = self.bsp.segmentList
 
     def stepThroughTreeSortof(self):
         '''This just helps me step through the tree one iteration at a time to see what it is doing for debugging.'''
