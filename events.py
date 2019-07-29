@@ -52,8 +52,9 @@ class EventManager(object):
                     self.controller.stepThroughTree()
                 if event.key == K_5:
                     self.controller.getTestSector()
-                if event.key == K_y:
-                    self.controller.stepThroughTreeSortof()
+                if event.key == K_p:
+                    self.controller.getSegmentDrawingOrder()
+
                     
             if event.type == MOUSEBUTTONDOWN:
                 if self.controller.editMode:

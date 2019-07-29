@@ -19,6 +19,7 @@ class GameController(object):
         self.background_connection = None
         self.background_check = None
         self.setBackground()
+        self.mousePosition = None
         self.grid = [] #list of lines that define the grid
         self.setup()
         self.events = EventManager(self)
@@ -71,8 +72,8 @@ class GameController(object):
     def update(self):
         '''Main game loop'''
         x, y = pygame.mouse.get_pos()
-        mouseposition = Vector2(x, y)
-
+        self.mouseposition = Vector2(x, y)
+        
         """
         self.hoverVertex = None
         for vertex in self.vertices.values():
@@ -95,7 +96,7 @@ class GameController(object):
         if self.connectionLine is not None:
             self.connectionLine.vector1 = mouseposition
         """
-        self.events.update(mouseposition)
+        self.events.update(self.mouseposition)
         self.render()
 
     """
@@ -113,14 +114,13 @@ class GameController(object):
 
     def getTestSector(self):
         '''From the testsectors file.  Press button 5'''
-        L = testsectors.sector1()
+        L = testsectors.sector2()
         print(L)
         self.segments = []
         for pair in L:     
             v1 = Vector2(pair[0])
             v2 = Vector2(pair[1])
             self.segments.append(Segment(v1, v2, name=pair[2]))
-
 
         self.bsp = BSP(self.segments)
         self.bsp.createTree()
@@ -132,11 +132,13 @@ class GameController(object):
         self.bsp.traverseTree()
         #self.segments = self.bsp.segmentList
 
-    def stepThroughTreeSortof(self):
-        '''This just helps me step through the tree one iteration at a time to see what it is doing for debugging.'''
-        self.bsp.traverseTreeTest()
-        #self.segments = self.bsp.segmentList
 
+    def getSegmentDrawingOrder(self):
+        '''The BSP tree is created and now we assume the mouse position is the player position.  Get the order the drawing priority order for the segments'''
+        print(self.mouseposition)
+        self.bsp.DP_SegmentsStart(self.mouseposition)
+
+    
 
     """
     def getAllSegments(self):

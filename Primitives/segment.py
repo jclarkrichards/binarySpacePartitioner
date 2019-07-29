@@ -129,7 +129,16 @@ class Segment(object):
     def reverse(self):
         '''Return a new segment that is just the reverse of this segment'''
         return Segment(self.p2, self.p1, self.virtual, self.name+"_r")
-     
+
+
+    def side(self, position):
+        '''Which side of the segment is the position?  Return "left" or "right"'''
+        p = position - self.p1
+        value = self.vector.cross(p)
+        if value >= 0:
+            return "right"
+        return "left"
+    
     def render(self, screen):
         x, y = self.p2.toTuple()
         x, y = int(x), int(y)

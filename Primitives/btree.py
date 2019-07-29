@@ -12,8 +12,12 @@ class TreeNode(object):
         self.visited = False
 
     def printData(self):
-        for d in self.data:
-            print(d)
+        if type(self.data) is list:
+            for d in self.data:
+                print(d)
+        else:
+            print(self.data)
+                
 
     
 class BinaryTree(object):
@@ -23,7 +27,7 @@ class BinaryTree(object):
 
     def setSegment(self, segment):
         '''Whatever is already in the data gets wiped and replaced by this'''
-        self.pointer.data = [segment]
+        self.pointer.data = segment
         
     def addSegment(self, segment):
         '''Add a segment to the node that is being pointed at currently.'''
