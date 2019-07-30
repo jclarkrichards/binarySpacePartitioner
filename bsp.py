@@ -10,6 +10,7 @@ class BinarySpacePartitioner(object):
         self.segmentList = segments
         self.tree = BinaryTree() #empty tree
         self.sector = None
+        self.player = None
         
     def createTree(self):
         '''Initially add all the segments to the root node.'''
@@ -163,12 +164,17 @@ class BinarySpacePartitioner(object):
         self.DP_Segments(position)
         print("Finished")
         
+    #def DP_Segments(self, node, position):
+    #    pass
+    
     def DP_Segments(self, position):
         if self.tree.isleaf():
-            self.tree.pointer.printData()
+            #self.tree.pointer.printData()
+            self.sendDataToPlayer()
             self.tree.pointer.visited = True
             if self.canTraverseToParent():
                 self.tree.gotoParent()
+                self.DP_Segments(position)
         else:
             canGoLeft = self.canTraverseLeft()
             canGoRight = self.canTraverseRight()
@@ -176,18 +182,27 @@ class BinarySpacePartitioner(object):
                 if self.canTraverseToParent():
                     self.tree.pointer.visited = True
                     self.tree.gotoParent()
+                    self.DP_Segments(position)
             elif canGoLeft and canGoRight:
                 if self.tree.pointer.data.side(position) == "right":
                     self.tree.gotoRight()
+                    self.DP_Segments(position)
                 else:
                     self.tree.gotoLeft()
+                    self.DP_Segments(position)
             elif canGoLeft and not canGoRight:
-                self.tree.pointer.printData()
+                #self.tree.pointer.printData()
+                self.sendDataToPlayer()
                 self.tree.gotoLeft()
+                self.DP_Segments(position)
             elif not canGoLeft and canGoRight:
                 self.tree.gotoRight()
+                self.DP_Segments(position)
 
-                
+
+    def sendDataToPlayer(self):
+        if self.player is not None:
+            self.player.constructWalls(self.tree.pointer.data)
 
 
     def unvisitNodes(self, node):

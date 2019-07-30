@@ -9,10 +9,12 @@ from Primitives.segment import Segment
 from events import EventManager
 from bsp import BinarySpacePartitioner as BSP
 import testsectors
+from player import Player
 
 class GameController(object):
     def __init__(self):
         pygame.init()
+        self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
         self.background = None
         self.background_edit = None
@@ -23,6 +25,8 @@ class GameController(object):
         self.grid = [] #list of lines that define the grid
         self.setup()
         self.events = EventManager(self)
+        self.printSegmentDrawingOrder = False
+        self.player = None
         
     def setup(self):
         self.vertices = {}
@@ -71,9 +75,16 @@ class GameController(object):
     """
     def update(self):
         '''Main game loop'''
+        #dt = self.clock.tick(30) / 1000.0
         x, y = pygame.mouse.get_pos()
         self.mouseposition = Vector2(x, y)
-        
+        if self.printSegmentDrawingOrder:
+            self.getSegmentDrawingOrder(self.mouseposition)
+            self.printSegmentDrawingOrder = False
+
+        if self.player is not None:
+            self.getSegmentDrawingOrder(self.player.position)
+        #    self.player.update(dt)
         """
         self.hoverVertex = None
         for vertex in self.vertices.values():
@@ -133,11 +144,16 @@ class GameController(object):
         #self.segments = self.bsp.segmentList
 
 
-    def getSegmentDrawingOrder(self):
+    def getSegmentDrawingOrder(self, position):
         '''The BSP tree is created and now we assume the mouse position is the player position.  Get the order the drawing priority order for the segments'''
-        print(self.mouseposition)
-        self.bsp.DP_SegmentsStart(self.mouseposition)
+        #print(self.mouseposition)
+        self.bsp.DP_SegmentsStart(position)
 
+    def createPlayer(self):
+        '''Create a player in the middle of the screen'''
+        if self.player is None:
+            self.player = Player(SCREENWIDTH/2, SCREENHEIGHT/2)
+            self.bsp.player = self.player
     
 
     """
@@ -231,7 +247,10 @@ class GameController(object):
         if len(self.segments) > 0:
             for seg in self.segments:
                 seg.render(self.screen)
-                
+
+        if self.player is not None:
+            self.player.render(self.screen)
+            
         pygame.display.update()
 
 

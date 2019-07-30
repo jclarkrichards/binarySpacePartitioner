@@ -10,50 +10,82 @@ class EventManager(object):
         self.directedGraph = True
         
     def update(self, mouseposition):
+        dt = self.controller.clock.tick(30) / 1000.0
+        key_pressed = pygame.key.get_pressed()
+        
+        if key_pressed[K_UP] or key_pressed[K_w]:
+            if self.controller.player is not None:
+                self.controller.player.moveForward(dt)
+        elif key_pressed[K_DOWN] or key_pressed[K_s]:
+            if self.controller.player is not None:
+                self.controller.player.moveBackward(dt)
+                
+        if key_pressed[K_RIGHT]:
+            if self.controller.player is not None:
+                self.controller.player.rotateCW(dt)
+        elif key_pressed[K_LEFT]:
+            if self.controller.player is not None:
+                self.controller.player.rotateCCW(dt)
+                
+        if key_pressed[K_a]:
+            if self.controller.player is not None:
+                self.controller.player.strafeLeft(dt)
+        elif key_pressed[K_d]:
+            if self.controller.player is not None:
+                self.controller.player.strafeRight(dt)
+        #if key_pressed[K_w]:
+        #    if self.controller.player is not None:
+        #        pass
+        #elif key_pressed[K_s]:
+        #    if self.controller.player is not None:
+        #        pass
+        
         for event in pygame.event.get():
             if event.type == QUIT:
                 exit()
 
             if event.type == KEYDOWN:
-                if event.key == K_g:
-                    #toggle the grid on and off
-                    self.controller.showGrid = not self.controller.showGrid
-                if event.key == K_1:
-                    #Move the vertices around to different positions
-                    self.controller.editMode = not self.controller.editMode
-                    self.controller.connectionMode = False
-                    self.controller.checkMode = False
-                    self.controller.probeMode = False
-                if event.key == K_2:
-                    #connect undirected segments between vertices
-                    self.controller.editMode = False
-                    self.controller.checkMode = False
-                    self.controller.probeMode = False
-                    self.controller.connectionMode = not self.controller.connectionMode
-                if event.key == K_3:
-                    self.controller.editMode = False
-                    self.controller.connectionMode = False
-                    self.controller.probeMode = False
-                    self.controller.checkMode = not self.controller.checkMode
-                if event.key == K_s:
-                    self.snapToGrid = not self.snapToGrid
-                    print("snap to grid : " + str(self.snapToGrid))
-                if event.key == K_x:
-                    #Erase all the neighbors from all the vertices (don't erase the vertices though)
-                    self.controller.removeNeighbors()
-                if event.key == K_z:
-                    #Erase everything from the screen and start from scratch
-                    self.controller.setup()
-                if event.key == K_n:
-                    self.controller.showVertices = not self.controller.showVertices
-                if event.key == K_b:
-                    self.controller.createBinaryTree()
+                #if event.key == K_g:
+                #    #toggle the grid on and off
+                #    self.controller.showGrid = not self.controller.showGrid
+                #if event.key == K_1:
+                #    #Move the vertices around to different positions
+                #    self.controller.editMode = not self.controller.editMode
+                #    self.controller.connectionMode = False
+                #    self.controller.checkMode = False
+                #    self.controller.probeMode = False
+                #if event.key == K_2:
+                #    #connect undirected segments between vertices
+                #    self.controller.editMode = False
+                #    self.controller.checkMode = False
+                #    self.controller.probeMode = False
+                #    self.controller.connectionMode = not self.controller.connectionMode
+                #if event.key == K_3:
+                #    self.controller.editMode = False
+                #    self.controller.connectionMode = False
+                #    self.controller.probeMode = False
+                #    self.controller.checkMode = not self.controller.checkMode
+                #if event.key == K_s:
+                #    self.snapToGrid = not self.snapToGrid
+                #    print("snap to grid : " + str(self.snapToGrid))
+                #if event.key == K_x:
+                #    #Erase all the neighbors from all the vertices (don't erase the vertices though)
+                #    self.controller.removeNeighbors()
+                #if event.key == K_z:
+                #    #Erase everything from the screen and start from scratch
+                #    self.controller.setup()
+                #if event.key == K_n:
+                #    self.controller.showVertices = not self.controller.showVertices
+                #if event.key == K_b:
+                #    self.controller.createBinaryTree()
                 if event.key == K_t:
                     self.controller.stepThroughTree()
                 if event.key == K_5:
                     self.controller.getTestSector()
                 if event.key == K_p:
-                    self.controller.getSegmentDrawingOrder()
+                    self.controller.createPlayer()
+                    #self.controller.printSegmentDrawingOrder = not self.controller.printSegmentDrawingOrder
+                    #self.controller.getSegmentDrawingOrder()
 
                     
             if event.type == MOUSEBUTTONDOWN:
