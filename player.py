@@ -9,7 +9,8 @@ class Player(object):
         self.movingDirection = Vector2(0,0)
         self.movingSpeed = 100
         self.turningSpeed = 360 / 1.0 #degrees / second (ex. 1 full rotation in 3 seconds)
-        self.fovAngle = 40 #Field of View angle from the facingAngle direction
+        self.fovAngle = 45 #Field of View angle from the facingAngle direction
+        self.fovAngle_rads = self.fovAngle * pi / 180
         self.fovRight = Vector2()  #Right-edge field of view
         self.fovLeft = Vector2() #Left-edge field of view
         self.setDirections()
@@ -47,18 +48,6 @@ class Player(object):
         x, y = self.facingDirection.toTuple()
         self.strafeDirection = Vector2(-y, x)        
 
-    def constructWalls(self, data):
-        '''Getting a list of segments that may need to be drawn.  Check which segments or portion of segmetns are within field of view.  
-        '''
-        if type(data) is list:
-            for d in data:
-                print(d)
-        else:
-            print(data)
-
-        print("")
-        print("")
-            
     def render(self, screen):
         '''Render the player as a circle with a line showing facing direction'''
         x, y = self.position.toTuple()

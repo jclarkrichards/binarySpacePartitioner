@@ -41,7 +41,16 @@ class Segment(object):
     def getRay(self):
         '''Return a Ray representation of this Segment'''
         return Ray(self.p1, self.vector)
-    
+
+    def intersectVector(self, pos, vec):
+        '''Does this segment intersect a vector?'''
+        s, t = utils.intersect(self.p1, pos, self.vector, vec)
+        #print(self.name + " intersects " + other.name + " using (s, t) -> ("+str(s)+", "+str(t)+")")
+        print("s="+str(s)+", t="+str(t))
+        if 0 < s < 1 and t >= 0:
+            return True
+        return False
+        
     def intersectSegment(self, other, includeEndpoints=False):
         '''Segment-Segment intersection.  Segments physically intersect each other'''
         s, t = utils.intersect(self.p1, other.p1, self.vector, other.vector)

@@ -11,6 +11,24 @@ class TreeNode(object):
         #self.isConvex = False
         self.visited = False
 
+    def leaf(self):
+        if self.right is None and self.left is None:
+            return True
+        return False
+
+    def leftOpen(self):
+        '''Is the left node available to travel to?'''
+        if self.left is not None and not self.left.visited:
+            return True
+        return False
+    
+    def rightOpen(self):
+        '''Is the left node available to travel to?'''
+        if self.right is not None and not self.right.visited:
+            return True
+        return False
+
+    
     def printData(self):
         if type(self.data) is list:
             for d in self.data:

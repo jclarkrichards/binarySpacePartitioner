@@ -10,7 +10,7 @@ class BinarySpacePartitioner(object):
         self.segmentList = segments
         self.tree = BinaryTree() #empty tree
         self.sector = None
-        self.player = None
+        #self.player = None
         
     def createTree(self):
         '''Initially add all the segments to the root node.'''
@@ -145,78 +145,5 @@ class BinarySpacePartitioner(object):
         self.tree.pointer.printData()
 
         
-    def DP_SegmentsStart(self, position):
-        '''Given a Players position Vector2, print out the drawing priority of the segments'''
-        self.tree.gotoRoot()
-        #print(self.tree.pointer.data)
-        #self.checkTree(self.tree.pointer)
-        #self.tree.gotoRoot()
-        self.unvisitNodes(self.tree.pointer)
-        #print("")
-        #self.tree.gotoRoot()
-        
-        #self.checkTree(self.tree.pointer)
-        self.tree.gotoRoot()
-        print("")
-        print("")
-        print("")
-        print("START")
-        self.DP_Segments(position)
-        print("Finished")
-        
-    #def DP_Segments(self, node, position):
-    #    pass
-    
-    def DP_Segments(self, position):
-        if self.tree.isleaf():
-            #self.tree.pointer.printData()
-            self.sendDataToPlayer()
-            self.tree.pointer.visited = True
-            if self.canTraverseToParent():
-                self.tree.gotoParent()
-                self.DP_Segments(position)
-        else:
-            canGoLeft = self.canTraverseLeft()
-            canGoRight = self.canTraverseRight()
-            if not canGoLeft and not canGoRight:
-                if self.canTraverseToParent():
-                    self.tree.pointer.visited = True
-                    self.tree.gotoParent()
-                    self.DP_Segments(position)
-            elif canGoLeft and canGoRight:
-                if self.tree.pointer.data.side(position) == "right":
-                    self.tree.gotoRight()
-                    self.DP_Segments(position)
-                else:
-                    self.tree.gotoLeft()
-                    self.DP_Segments(position)
-            elif canGoLeft and not canGoRight:
-                #self.tree.pointer.printData()
-                self.sendDataToPlayer()
-                self.tree.gotoLeft()
-                self.DP_Segments(position)
-            elif not canGoLeft and canGoRight:
-                self.tree.gotoRight()
-                self.DP_Segments(position)
 
-
-    def sendDataToPlayer(self):
-        if self.player is not None:
-            self.player.constructWalls(self.tree.pointer.data)
-
-
-    def unvisitNodes(self, node):
-        '''Unvisit all of the nodes in the tree'''
-        if node is not None:
-            #print("unvisit node")
-            node.visited = False
-            self.unvisitNodes(node.left)
-            self.unvisitNodes(node.right)
-
-
-    def checkTree(self, node):
-        if node is not None:
-            print(node.visited)
-            self.checkTree(node.left)
-            self.checkTree(node.right)
             
