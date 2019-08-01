@@ -23,6 +23,7 @@ class GameController(object):
         self.player = None
         self.WR3D = None
         self.mode3D = False
+        print("SCREEN WIDTH = " + str(SCREENWIDTH))
         
     def update(self):
         '''Main game loop'''
