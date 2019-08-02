@@ -46,7 +46,7 @@ class Segment(object):
         '''Does this segment intersect a vector?'''
         s, t = utils.intersect(self.p1, pos, self.vector, vec)
         #print(self.name + " intersects " + other.name + " using (s, t) -> ("+str(s)+", "+str(t)+")")
-        print("s="+str(s)+", t="+str(t))
+        #print("s="+str(s)+", t="+str(t))
         if 0 < s < 1 and t >= 0:
             return True
         return False

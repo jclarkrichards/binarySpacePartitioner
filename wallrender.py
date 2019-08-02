@@ -8,15 +8,15 @@ class WallRender3D(object):
     def __init__(self, tree, player):
         self.tree = tree
         self.player = player
-        self.xfill = [[-10000,0],[SCREENWIDTH, 10000]]
+        self.xRangeList = [[-float("inf"),0],[SCREENWIDTH, float("inf")]]
         
     def DP_Segments(self, node, position):
         if node is not None:
             if node.leaf():
-                self.SP_XPosition(node.data)
+                self.buildWalls(node.data)
                 #node.printData()
                 node.visited = True
-                if len(self.xfill) > 1:
+                if len(self.xRangeList) > 1:
                     self.DP_Segments(node.parent, position)
             else:
                 if node.rightOpen():
@@ -29,8 +29,8 @@ class WallRender3D(object):
                         self.DP_Segments(node.right, position)
 		elif node.leftOpen():
                     #node.printData()
-                    self.SP_XPosition(node.data)
-                    if len(self.xfill) > 1:
+                    self.buildWalls(node.data)
+                    if len(self.xRangeList) > 1:
                         self.DP_Segments(node.left, position)
 		else:
                     node.visited = True
@@ -44,59 +44,49 @@ class WallRender3D(object):
             self.unvisitNodes(node.left)
             self.unvisitNodes(node.right)
 
-    def SP_XPosition(self, data):
+    def buildWalls(self, data):
         '''Given a list of segments (or a single Segment) find where the segments p1 and p2 points would appear on the screens x position'''
         test = []
         if type(data) is list:
             for segment in data:
-                self.segmentInFOV(segment)
+                self.transformSegment(segment)
                 
         else:
             print(data.name + " : p1=" + str(data.p1) + " , p2="+str(data.p2))
-            self.segmentInFOV(data)
+            self.transformSegment(data)
         print("")
 
-    def segmentInFOV(self, segment):
+    def transformSegment(self, segment):
         '''Check if any of the segment is within the field of view of the player'''
-        self.pointInFOV(segment.p1)
-        self.pointInFOV(segment.p2)
-
-        
-        p1 = segment.p1 - self.player.position
-        p2 = segment.p2 - self.player.position
-        angle1 = self.player.facingDirection.angle(p1)
-        angle2 = self.player.facingDirection.angle(p2)
-        cross1 = self.player.facingDirection.cross(p1)
-        cross2 = self.player.facingDirection.cross(p2)
-        if (angle1 <= self.player.fovAngle_rads or
-            angle2 <= self.player.fovAngle_rads):
-            if cross1 < 0: angle1 *= -1
-            if cross2 < 0: angle2 *= -1
-            x1 = self.calculateXpositionFromAngle(angle1)
-            x2 = self.calculateXpositionFromAngle(angle2)
-            #print(segment.name + " : p1=" + str(segment.p1) + " , p2="+str(segment.p2))
-            print(segment.name + " :: " + str(x1) + "    " + str(x2))
-            self.updateXFill(x1, x2)
+        angle1 = self.getAngleFromFD(segment.p1)
+        angle2 = self.getAngleFromFD(segment.p2)
+        segmentValid = False
+        if (abs(angle1) <= self.player.fovAngle_rads or
+            abs(angle2) <= self.player.fovAngle_rads):
+            segmentValid = True
         else: #both points outside fov, but does the segment cross the pointing direction?
             if segment.intersectVector(self.player.position, self.player.facingDirection):
-                if cross1 < 0: angle1 *= -1
-                if cross2 < 0: angle2 *= -1
-                x1 = self.calculateXpositionFromAngle(angle1)
-                x2 = self.calculateXpositionFromAngle(angle2)
-                #print(segment.name + " : p1=" + str(segment.p1) + " , p2="+str(segment.p2))
-                print(segment.name + " :: " + str(x1) + "   " + str(x2))
-                self.updateXFill(x1, x2)
-            #else:
-            #    print("NO")
-
-    def pointInFOV(self, point):
+                segmentValid = True
+        if segmentValid:
+            x1 = self.calculateXpositionFromAngle(angle1)
+            x2 = self.calculateXpositionFromAngle(angle2)
+            if x1 < x2: self.updateXFill(segment, [x1, x2])
+            else: self.updateXFill(segment, [x2, x1])
+        
+    def getAngleFromFD(self, point):
         '''Check if a point is within the field of view of the player'''
-        pass
-    
-    def updateXFill(self, x1, x2):
+        p = point - self.player.position
+        angle = self.player.facingDirection.angle(p)
+        cross = self.player.facingDirection.cross(p)
+        if cross < 0: angle *= -1
+        return angle
+
+    def updateXFill(self, segment, valueRange):
         '''Use these x values to fill in the x fill list'''
-        pass
-    
+        print(segment.name + "---------------->" + str(valueRange))
+        self.xRangeList.append(valueRange)
+        print(self.xRangeList)
+        
     def calculateXpositionFromAngle(self, angle):
         '''Find the x position on the screen given the angle found previously'''
         val = (SCREENWIDTH/2.0)*((angle/self.player.fovAngle_rads) + 1)
@@ -109,7 +99,7 @@ class WallRender3D(object):
     #        self.checkTree(node.right)
     
     def render(self, screen):
-        self.xfill = [[-10000,0],[SCREENWIDTH, 10000]]
+        self.xRangeList = [[-float("inf"),0],[SCREENWIDTH, float("inf")]]
         self.unvisitNodes(self.tree.root)
         #print(str(self.player.facingDirection) + " :: " + str(self.player.facingAngle))
         print("START")
