@@ -2,19 +2,18 @@ from copy import deepcopy
 #python2 uses float("inf")
 #python3 uses math.inf
 values = [[-float("inf"), 0.0], [576.0, float("inf")]] #initial range, values outside these ranges get squashed to this range
-#valueList = [[-380.0, 222.0], [222.0, 606.0], [353.0, 470.0]]
-valueList = [[-380.0, 222.0], [222.0, 606.0], [353.0, 470.0], [351.0, 353.0], [351.0, 450.0], [450.0, 670.0]]
+#valueList = [[-380.0, 222.0], [353.0, 470.0], [351.0, 353.0], [222.0, 606.0], [351.0, 450.0], [450.0, 670.0]]
+valueList = [[443.0, 943.0], [174.0, 313.0], [218.0, 313.0], [218.0, 326.0], [326.0, 443.0], [-268.0, 174.0]]
 
-#newvalues = []
 for newvalue in valueList:
     newvalues = []
-    #print("")
-    #print(".................................")
-    #print("Values = " + str(values))
-    #print("new value = " + str(newvalue))
+    print("")
+    print(".................................")
+    print("Values = " + str(values))
+    print("new value = " + str(newvalue))
     values.append(newvalue)
     if len(values) > 1:
-        #print(values)
+        print(values)
         while len(values) > 0:
             if len(values) == 1:
                 junk = values.pop(0)
@@ -48,15 +47,15 @@ for newvalue in valueList:
                     #print("Values = " + str(values))
 
                 if not found:
-                    print("item " + str(item) + " not matching")
+                    #print("item " + str(item) + " not matching")
                     newvalues.append(item)
 
             #print("END OF THE LINE " + str(values))        
-    #print("values now = " + str(newvalues))
+    print("values now = " + str(newvalues))
     values = deepcopy(newvalues)
     if len(values) == 1:
         break
     
 print("++++++++++++++++++++++++++++++++++++")
-print(newvalues)
+#print(newvalues)
 print(values)
