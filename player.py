@@ -1,6 +1,8 @@
 import pygame
 from Primitives.vectors import Vector2
 from math import sin, cos, pi   
+from constants import *
+import utils
 
 class Player(object):
     def __init__(self, x, y):
@@ -9,8 +11,8 @@ class Player(object):
         self.movingDirection = Vector2(0,0)
         self.movingSpeed = 100
         self.turningSpeed = 360 / 1.0 #degrees / second (ex. 1 full rotation in 3 seconds)
-        self.fovAngle = 45 #Field of View angle from the facingAngle direction
-        self.fovAngle_rads = self.fovAngle * pi / 180
+        #self.fovAngle = 45 #Field of View angle from the facingAngle direction
+        #self.fovAngle_rads = utils.angleToRad(FOV)
         self.fovRight = Vector2()  #Right-edge field of view
         self.fovLeft = Vector2() #Left-edge field of view
         self.setDirections()
@@ -42,9 +44,12 @@ class Player(object):
         self.position -= self.strafeDirection * self.movingSpeed * dt
 
     def setDirections(self):
-        self.facingDirection = Vector2(cos(self.facingAngle*pi/180), sin(self.facingAngle*pi/180))
-        self.fovRight = Vector2(cos((self.facingAngle+self.fovAngle)*pi/180), sin((self.facingAngle+self.fovAngle)*pi/180))
-        self.fovLeft = Vector2(cos((self.facingAngle-self.fovAngle)*pi/180), sin((self.facingAngle-self.fovAngle)*pi/180))
+        a = utils.angleToRad(self.facingAngle)
+        ap = utils.angleToRad(self.facingAngle + FOV)
+        am = utils.angleToRad(self.facingAngle - FOV)
+        self.facingDirection = Vector2(cos(a), sin(a))
+        self.fovRight = Vector2(cos(ap), sin(ap))
+        self.fovLeft = Vector2(cos(am), sin(am))
         x, y = self.facingDirection.toTuple()
         self.strafeDirection = Vector2(-y, x)        
 

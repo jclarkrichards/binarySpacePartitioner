@@ -1,3 +1,5 @@
+from math import pi
+
 TILEWIDTH = 16
 TILEHEIGHT = 16
 NROWS = 28
@@ -18,3 +20,5 @@ CHECKMODECOLOR = (100,150,50)
 PROBEMODECOLOR = (250, 180, 150)
 DARKGRAY = (50,50,50)
 
+FOV = 45 #defines the field of view of the player from the center view point.  The entire field of view is 2*FOV
+FOVR = FOV * pi / 180

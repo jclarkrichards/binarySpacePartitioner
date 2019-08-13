@@ -1,5 +1,7 @@
 from copy import deepcopy
+from math import pi
 from Primitives.vectors import Vector2
+from constants import *
 
 def clamp(value, precision):
     '''Clamp a value'''
@@ -171,3 +173,16 @@ def minmaxValues(D, key, M):
         index = negativeValues.index(max(negativeValues))
         maxval = [negative[index]]
     return minval + maxval
+
+def angleToRad(angle):
+    return angle * pi / 180
+
+def radToAngle(rad):
+    return rad * 180 / pi
+
+def getXFromAngle(angle):
+    x = (SCREENWIDTH/2.0)*((angle/FOVR) + 1)
+    return clamp(x, 0)
+
+def getAngleFromX(x):
+    return FOVR*(((2*x)/SCREENWIDTH) - 1)

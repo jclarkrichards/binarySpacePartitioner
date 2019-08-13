@@ -2,6 +2,7 @@ import pygame
 from math import pi
 from constants import *
 import utils
+from copy import deepcopy
 """This class takes the BSP tree and the player in order to construct the 3D walls in the players viewport"""
 
 class WallRender3D(object):
@@ -61,15 +62,16 @@ class WallRender3D(object):
         angle1 = self.getAngleFromFD(segment.p1)
         angle2 = self.getAngleFromFD(segment.p2)
         segmentValid = False
-        if (abs(angle1) <= self.player.fovAngle_rads or
-            abs(angle2) <= self.player.fovAngle_rads):
+        if (abs(angle1) <= FOVR or abs(angle2) <= FOVR):
             segmentValid = True
         else: #both points outside fov, but does the segment cross the pointing direction?
             if segment.intersectVector(self.player.position, self.player.facingDirection):
                 segmentValid = True
         if segmentValid:
-            x1 = self.calculateXpositionFromAngle(angle1)
-            x2 = self.calculateXpositionFromAngle(angle2)
+            x1 = utils.getXFromAngle(angle1)
+            x2 = utils.getXFromAngle(angle2)
+            #x1 = self.calculateXpositionFromAngle(angle1)
+            #x2 = self.calculateXpositionFromAngle(angle2)
             if x1 < x2: self.updateXFill(segment, [x1, x2])
             else: self.updateXFill(segment, [x2, x1])
         
@@ -86,11 +88,34 @@ class WallRender3D(object):
         print(segment.name + "---------------->" + str(valueRange))
         self.xRangeList.append(valueRange)
         print(self.xRangeList)
-        
-    def calculateXpositionFromAngle(self, angle):
-        '''Find the x position on the screen given the angle found previously'''
-        val = (SCREENWIDTH/2.0)*((angle/self.player.fovAngle_rads) + 1)
-        return utils.clamp(val, 0)
+        print(str(valueRange[0]) + " ===> " + str(utils.radToAngle(utils.getAngleFromX(valueRange[0]))))
+        print(str(valueRange[1]) + " ===> " + str(utils.radToAngle(utils.getAngleFromX(valueRange[1]))))
+
+    def mergeXList(self):
+        '''Takes the xlist and merges it if values overlap'''
+        temp = deepcopy(self.xRangeList)
+        while len(temp) > 0:
+            item = temp.pop(0)
+            mergeable = False
+            for other in temp:
+                if other[0] <= item[0] <= other[1]:
+                    if item[1] >= other[1]:
+                        pass #item range is partially within the other range 
+                    else:
+                        pass #item range is entirely within the other range
+                    mergeable = True
+                elif other[0] <= item[1] <= other[1]:
+                    if item[0] <= other[0]:
+                        pass
+                    else:
+                        pass
+                    mergeable = True
+
+            if not mergeable:
+                pass #item is not mergeable, put it back onto the list
+
+        self.xRangeList = deepcopy(temp)
+
     
     #def checkTree(self, node):                                                                                                                  
     #    if node is not None:                                                                                                                    
