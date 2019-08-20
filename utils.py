@@ -1,5 +1,5 @@
 from copy import deepcopy
-from math import pi
+from math import pi, cos, sin
 from Primitives.vectors import Vector2
 from constants import *
 
@@ -186,3 +186,54 @@ def getXFromAngle(angle):
 
 def getAngleFromX(x):
     return FOVR*(((2*x)/SCREENWIDTH) - 1)
+
+def removeEmptyKeys(D):
+    '''Given a dictionary, remove any key that has an empty entry for its value'''
+    newD = {}
+    for key in D.keys():
+        if type(D[key]) is list:
+            if len(D[key]) != 0:
+                newD[key] = D[key]
+    return newD
+
+def getAnglesFromXdict(D):
+    '''Given a dictionary of x positions, get a new dictionary that converts the x positions to angle'''
+    newD = {}
+    for key in D.keys():
+        values = []
+        for item in D[key]:
+            newitem = []
+            for val in item:
+                newitem.append(getAngleFromX(val))
+            values.append(newitem)
+        newD[key] = values
+    return newD
+
+def getPointingVectorsFromAngleDict(alpha, D):
+    alpha = angleToRad(alpha)
+    newD = {}
+    for key in D.keys():
+        values = []
+        for item in D[key]:
+            newitem = []
+            for theta in item:
+                newitem.append(Vector2(cos(alpha+theta), sin(alpha+theta)))
+                #newitem.append(getAngleFromX(val))
+            values.append(newitem)
+        newD[key] = values
+    return newD
+
+def getDistancesFromDirectionDict(p1, D):
+    newD = {}
+    for key in D.keys():
+        values = []
+        for item in D[key]:
+            newitem = []
+            for vec in item:
+                s, t = intersect(p1, key.p1, vec, key.direction)
+                newitem.append(s)
+            values.append(newitem)
+        newD[key] = values
+    return newD
+
+    

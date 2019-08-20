@@ -11,6 +11,7 @@ class WallRender3D(object):
         self.tree = tree
         self.player = player
         self.wallcull = WallCull()
+        self.distancesTest = {}
         
     def DP_Segments(self, node, position):
         if node is not None:
@@ -18,10 +19,7 @@ class WallRender3D(object):
                 self.buildWalls(node.data)
                 #node.printData()
                 node.visited = True
-                if not self.wallcull.canstop():
-                    self.DP_Segments(node.parent, position)
-                else:
-                    print("STOP.............. " + str(self.wallcull.segmentDict))
+                self.continueOrStop(node.parent, position)
             else:
                 if node.rightOpen():
                     if node.leftOpen():
@@ -34,15 +32,62 @@ class WallRender3D(object):
 		elif node.leftOpen():
                     #node.printData()
                     self.buildWalls(node.data)
-                    if not self.wallcull.canstop():
-                        self.DP_Segments(node.left, position)
-                    else:
-                        print("STOP........ " + str(self.wallcull.segmentDict))
+                    self.continueOrStop(node.left, position)
+                    #if not self.wallcull.canstop():
+                    #    self.DP_Segments(node.left, position)
+                    #else:
+                    #    print("STOP........ " + str(self.wallcull.segmentDict))
 		else:
                     node.visited = True
                     self.DP_Segments(node.parent, position)
 
+
+    def continueOrStop(self, node, position):
+        if not self.wallcull.canstop():
+            self.DP_Segments(node, position)
+        else:
+            print("STOP.............. " + str(len(self.wallcull.segmentDict)))
+            print(self.wallcull.xrangeList)
+            print("=============X Positions for each Segment====================")
+            xDict = utils.removeEmptyKeys(self.wallcull.segmentDict)
+            angleDict = utils.getAnglesFromXdict(xDict)
+            dirDict = utils.getPointingVectorsFromAngleDict(self.player.facingAngle, angleDict)
+            distanceDict = utils.getDistancesFromDirectionDict(self.player.position, dirDict)
+
+            #just for testing
+            self.distancesTest = {}
+            for key in dirDict.keys():
+                values = []
+                for i, item in enumerate(dirDict[key]):
+                    newitem = []
+                    for j, vec in enumerate(item):
+                        newitem.append(vec * distanceDict[key][i][j])
+                    values.append(newitem)
+                self.distancesTest[key] = values
+
+            
+                
+            
+            
+            print(xDict)
+            print(angleDict)
+            print(dirDict)
+            print("..................................")
+            print(self.player.facingAngle)
+            for key in xDict.keys():
+                print(str(key.name) + " : " + str(xDict[key]))
+                for item in dirDict[key]:
+                    print(str(item[0]) + " , " + str(item[1]))
+                print("DISTANCES")
+                for item in distanceDict[key]:
+                    print(item)
+                print("")
+                
+            print("")
+            print("")
+            
     
+        
     def unvisitNodes(self, node):
         '''Unvisit all of the nodes in the tree'''
         if node is not None:
@@ -95,9 +140,19 @@ class WallRender3D(object):
         self.wallcull.update(segment, valueRange)
         
     def render(self, screen):
+        '''Draw the 3D walls here'''
         self.wallcull.reset()
         self.unvisitNodes(self.tree.root)
         print("START")
         self.DP_Segments(self.tree.root, self.player.position)
         print("Finished")
         print("")
+
+        #test to see the lines being drawn...
+        if len(self.distancesTest) > 0:
+            for key in self.distancesTest.keys():
+                for item in self.distancesTest[key]:
+                    for vec in item:
+                        x1, y1 = self.player.position.toTuple()
+                        x2, y2 = vec.toTuple()
+                        pygame.draw.line(screen, (255,255,255), [x1, y1], [x1+x2, y1+y2], 2)
