@@ -210,6 +210,7 @@ def getAnglesFromXdict(D):
     return newD
 
 def getPointingVectorsFromAngleDict(alpha, D):
+    '''Given the players pointing angle alpha and a dictionary of other angles, get the vectors.'''
     alpha = angleToRad(alpha)
     newD = {}
     for key in D.keys():
@@ -224,6 +225,7 @@ def getPointingVectorsFromAngleDict(alpha, D):
     return newD
 
 def getDistancesFromDirectionDict(p1, D):
+    '''Given the center position of the player and an angle dictionary, get the actual distances'''
     newD = {}
     for key in D.keys():
         values = []
@@ -236,4 +238,34 @@ def getDistancesFromDirectionDict(p1, D):
         newD[key] = values
     return newD
 
+def fisheyeCorrection(distanceDict, angleDict):
+    '''Given a bunch of distances and their angles from players pointing direction, find the distance corrected versions'''
+    print("FISHEYE")
+    print("......BEFORE.......")
+    for key in distanceDict.keys():
+        print(distanceDict[key])
+    print("")
+    newDict = {}
+    for key in distanceDict.keys():
+        newDict[key] = []
+        for i, item in enumerate(distanceDict[key]):
+            d1 = item[0] * cos(angleDict[key][i][0])
+            d2 = item[1] * cos(angleDict[key][i][1])
+            newDict[key].append([d1, d2])
+        #print(str(distanceDict[key]) + " : angle is " + str(angleDict[key]))
+    print("......AFTER.......")
+    for key in newDict.keys():
+        print(newDict[key])
+    print("")
+    print("(0)..................(0)")
+    return newDict
+
+def getWallHeightPair(d):
+    '''Given an distance value, return the wall height pair that defines the height of the wall at that distance.
+    Returns the pair in top to bottom order.  reverse is true then return in bottom to top order.'''
+    H = SCREENHEIGHT
+    D = 20.0
+    y1 = (H/2.0) * (1 - (D/d))
+    y2 = (H/2.0) * (1 + (D/d))
+    return [clamp(y1, 2), clamp(y2, 2)]
     

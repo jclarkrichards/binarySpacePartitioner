@@ -4,6 +4,7 @@ from constants import *
 import utils
 from copy import deepcopy
 from wallculler import WallCull
+from random import randint
 """This class takes the BSP tree and the player in order to construct the 3D walls in the players viewport"""
 
 class WallRender3D(object):
@@ -12,6 +13,7 @@ class WallRender3D(object):
         self.player = player
         self.wallcull = WallCull()
         self.distancesTest = {}
+        self.wallDefs = {}
         
     def DP_Segments(self, node, position):
         if node is not None:
@@ -53,7 +55,12 @@ class WallRender3D(object):
             angleDict = utils.getAnglesFromXdict(xDict)
             dirDict = utils.getPointingVectorsFromAngleDict(self.player.facingAngle, angleDict)
             distanceDict = utils.getDistancesFromDirectionDict(self.player.position, dirDict)
+            distanceDict = utils.fisheyeCorrection(distanceDict, angleDict)
 
+            self.buildWallDict(xDict, distanceDict)
+
+            
+            
             #just for testing
             self.distancesTest = {}
             for key in dirDict.keys():
@@ -69,19 +76,19 @@ class WallRender3D(object):
                 
             
             
-            print(xDict)
-            print(angleDict)
-            print(dirDict)
+            #print(xDict)
+            #print(angleDict)
+            #print(dirDict)
             print("..................................")
-            print(self.player.facingAngle)
-            for key in xDict.keys():
-                print(str(key.name) + " : " + str(xDict[key]))
-                for item in dirDict[key]:
-                    print(str(item[0]) + " , " + str(item[1]))
-                print("DISTANCES")
-                for item in distanceDict[key]:
-                    print(item)
-                print("")
+            #print(self.player.facingAngle)
+            #for key in xDict.keys():
+            #    print(str(key.name) + " : " + str(xDict[key]))
+            #    for item in dirDict[key]:
+            #        print(str(item[0]) + " , " + str(item[1]))
+            #    print("DISTANCES")
+            #    for item in distanceDict[key]:
+            #        print(item)
+            #    print("")
                 
             print("")
             print("")
@@ -138,6 +145,44 @@ class WallRender3D(object):
         print(str(valueRange[0]) + " ===> " + str(utils.radToAngle(utils.getAngleFromX(valueRange[0]))))
         print(str(valueRange[1]) + " ===> " + str(utils.radToAngle(utils.getAngleFromX(valueRange[1]))))
         self.wallcull.update(segment, valueRange)
+
+    def buildWallDict(self, xDict, distancesDict):
+        '''Build a dictionary with the x positions as keys and the 2 y positions for each x position as values'''
+        print("BUILDING THE WALL")
+        self.wallDefs = []
+        for key in xDict.keys():
+            for i, xs in enumerate(xDict[key]):
+                #newkey = tuple(xs)
+                #self.wallDefs[newkey] = []
+                #for j in range(len(xs)):
+                #print(newkey)
+                #self.wallDefs[newkey].append(distancesDict[key][i])
+                #print(distancesDict[key][i])
+                hpair1 = utils.getWallHeightPair(distancesDict[key][i][0])
+                hpair2 = utils.getWallHeightPair(distancesDict[key][i][1])
+                polygon = [(xs[0], hpair1[0]), (xs[0], hpair1[1]), (xs[1], hpair2[1]), (xs[1], hpair2[0])]
+                print(polygon)
+                print("")
+                self.wallDefs.append(polygon)
+                
+                #for val in distancesDict[key][i]:
+                #    print("...."+str(val))
+                #    hpair = utils.getWallHeightPair(val)
+                    
+        #for key in self.wallDefs.keys():
+        #    print(str(key) + " : " + str(self.wallDefs[key]))
+
+        print("X positions")        
+        for key in xDict.keys():
+            print(xDict[key])
+
+        print("")
+        print("Distances.....")
+        for key in distancesDict.keys():
+            print(distancesDict[key])
+        print("")
+        print(self.wallDefs)
+        print("WALL BUILT")
         
     def render(self, screen):
         '''Draw the 3D walls here'''
@@ -148,11 +193,18 @@ class WallRender3D(object):
         print("Finished")
         print("")
 
+        #Draw the walls now
+        if len(self.wallDefs) > 0:
+            for poly in self.wallDefs:
+                #pygame.draw.polygon(screen, (randint(100,220), randint(100,220), randint(100,220)), poly)
+                pygame.draw.polygon(screen, (100,100,100), poly) #it would be nice if walls further away were darker.
+        
+        #pygame.draw.polygon(screen, (100,100,100), [(100,100), (100, 300), (200,250), (200, 50)])
         #test to see the lines being drawn...
-        if len(self.distancesTest) > 0:
-            for key in self.distancesTest.keys():
-                for item in self.distancesTest[key]:
-                    for vec in item:
-                        x1, y1 = self.player.position.toTuple()
-                        x2, y2 = vec.toTuple()
-                        pygame.draw.line(screen, (255,255,255), [x1, y1], [x1+x2, y1+y2], 2)
+        #if len(self.distancesTest) > 0:
+        #    for key in self.distancesTest.keys():
+        #        for item in self.distancesTest[key]:
+        #            for vec in item:
+        #                x1, y1 = self.player.position.toTuple()
+        #                x2, y2 = vec.toTuple()
+        #                pygame.draw.line(screen, (255,255,255), [x1, y1], [x1+x2, y1+y2], 2)
