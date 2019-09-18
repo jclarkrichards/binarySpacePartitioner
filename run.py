@@ -41,6 +41,7 @@ class GameController(object):
         self.vertex_key_ctr = 0
         self.bsp = None
         self.testvertexlist = []
+        self.clock = pygame.time.Clock()
         
     def setBackground(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
@@ -104,7 +105,7 @@ class GameController(object):
     def getTestSector(self):
         '''From the testsectors file.  '''
         L = testsectors.sector1()
-
+        print("Test sector set")
     
     def getAllSegments(self):
         '''Just returns a list of all of the segments.  [(1,2), (2,3), (4,5), ...].

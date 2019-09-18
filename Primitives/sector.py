@@ -37,15 +37,18 @@ class Sector(object):
             d[key] = []
             for otherkey in self.sMatrix[key].keys():
                 value = self.sMatrix[key][otherkey]
-                if 0 < value < 1: #between 0 and 1 (inclusive)
-                    if value == 0:
-                        if self.sMatrix[otherkey][key] != 1:
+                print(key, otherkey, len(self.sMatrix))
+                print(self.sMatrix)
+                if value is not None:
+                    if 0 < value < 1: #between 0 and 1 (inclusive)
+                        if value == 0:
+                            if self.sMatrix[otherkey][key] != 1:
+                                d[key].append(otherkey)
+                        elif value == 1:
+                            if self.sMatrix[otherkey][key] != 0:
+                                d[key].append(otherkey)
+                        else:
                             d[key].append(otherkey)
-                    elif value == 1:
-                        if self.sMatrix[otherkey][key] != 0:
-                            d[key].append(otherkey)
-                    else:
-                        d[key].append(otherkey)
                         
         return d
     

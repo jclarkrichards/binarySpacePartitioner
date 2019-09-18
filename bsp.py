@@ -93,7 +93,7 @@ class BinarySpacePartitioner(object):
             elif self.canTraverseRight():
                 self.traverseRight()
             elif self.canTraverseToParent():
-		self.traverseToParent()
+                self.traverseToParent()
             else:
                 print("Finished... All are convex")            
 

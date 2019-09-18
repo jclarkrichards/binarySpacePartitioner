@@ -25,24 +25,19 @@ class WallRender3D(object):
             else:
                 if node.rightOpen():
                     if node.leftOpen():
-			if node.data.side(position) == "right":
+                        if node.data.side(position) == "right":
                             self.DP_Segments(node.right, position)
-			else:
+                        else:
                             self.DP_Segments(node.left, position)
                     else:
                         self.DP_Segments(node.right, position)
-		elif node.leftOpen():
-                    #node.printData()
+                elif node.leftOpen():
                     self.buildWalls(node.data)
                     self.continueOrStop(node.left, position)
-                    #if not self.wallcull.canstop():
-                    #    self.DP_Segments(node.left, position)
-                    #else:
-                    #    print("STOP........ " + str(self.wallcull.segmentDict))
-		else:
+
+                else:
                     node.visited = True
                     self.DP_Segments(node.parent, position)
-
 
     def continueOrStop(self, node, position):
         if not self.wallcull.canstop():
